@@ -1,0 +1,688 @@
+/* 旋盤作業時間管理アプリのスタイル */
+
+:root {
+    --primary-color: #2196F3;
+    --secondary-color: #FF9800;
+    --success-color: #4CAF50;
+    --danger-color: #F44336;
+    --warning-color: #FFC107;
+    --dark-color: #333333;
+    --light-color: #F5F5F5;
+    --card-bg: #FFFFFF;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --header-bg: var(--primary-color);
+}
+
+.dark-mode {
+    --primary-color: #0D47A1;
+    --secondary-color: #E65100;
+    --success-color: #2E7D32;
+    --danger-color: #C62828;
+    --warning-color: #F57F17;
+    --dark-color: #F5F5F5;
+    --light-color: #333333;
+    --card-bg: #1E1E1E;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --header-bg: #121212;
+    
+    background-color: #121212 !important;
+    color: #E0E0E0 !important;
+}
+
+body {
+    background-color: #F0F2F5;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* カードスタイル */
+.card {
+    box-shadow: var(--card-shadow);
+    border-radius: 12px;
+    border: none;
+    margin-bottom: 20px;
+    overflow: hidden;
+    background: var(--card-bg);
+}
+
+.card-header {
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+    padding: 15px 20px;
+    font-weight: 500;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* アプリバー */
+.app-bar {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 20px;
+}
+
+.app-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* タイマー表示 */
+.timer-display {
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--dark-color);
+    background: linear-gradient(145deg, #f0f0f0, #ffffff);
+    border-radius: 16px;
+    padding: 20px 30px;
+    box-shadow: 5px 5px 15px #d1d1d1, -5px -5px 15px #ffffff;
+    font-family: 'Roboto Mono', monospace;
+    display: inline-block;
+    margin: 10px auto;
+    line-height: 1;
+    text-align: center;
+    width: 100%;
+    max-width: 280px;
+}
+
+/* アクションボタン */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 10px 20px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: #1976D2;
+    box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btn-success:hover {
+    background-color: #388E3C;
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: #333;
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+.btn-warning:hover {
+    background-color: #FFA000;
+    box-shadow: 0 6px 12px rgba(255, 193, 7, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-lg {
+    font-size: 1.1rem;
+    padding: 12px 24px;
+}
+
+/* 作業セッションリスト */
+#workSessionsList .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: none;
+    background-color: #f9f9f9;
+    padding: 12px 15px;
+}
+
+/* タッチデバイス向け最適化 */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .btn {
+        padding: 10px 16px;
+        font-size: 1rem;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .btn-group .btn {
+        width: auto;
+        margin-bottom: 0;
+    }
+    
+    .timer-display {
+        font-size: 3.5rem;
+        padding: 15px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    /* スマホではボタンを下部に固定 */
+    .action-buttons-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 10px 15px;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+    }
+    
+    /* スペースを確保するためのダミー要素 */
+    .action-buttons-spacer {
+        height: 80px;
+    }
+    
+    /* アプリとしてインストールされたときのための調整 */
+    @media (display-mode: standalone) {
+        body {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .app-bar {
+            padding-top: calc(15px + env(safe-area-inset-top));
+        }
+        
+        .action-buttons-container {
+            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* 完了済み作業テーブル */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table th {
+    background-color: #f1f1f1;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 15px;
+}
+
+.table td {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+.table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-responsive {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* アクションボタン */
+.action-btn {
+    padding: 6px 12px;
+    margin-right: 5px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* ステータスインジケーター */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-active {
+    background-color: var(--success-color);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.status-paused {
+    background-color: var(--warning-color);
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+}
+
+.status-completed {
+    background-color: #6c757d;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.2);
+}
+
+/* エラーと通知スタイル */
+.error-text {
+    color: var(--danger-color);
+}
+
+.success-text {
+    color: var(--success-color);
+}
+
+/* 同期インジケーターのアニメーション */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.sync-spinner {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    vertical-align: middle;
+}
+
+/* モーダル */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 20px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    border-top: none;
+    padding: 20px;
+}
+
+/* ホームスクリーンに追加を促すバナー */
+.install-banner {
+    display: none;
+    background-color: var(--primary-color);
+    color: white;
+    text-align: center;
+    padding: 12px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1001;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.install-banner.show {
+    display: block;
+}
+
+/* アラートとトースト */
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.toast {
+    border-radius: 10px;
+    border: none;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ダークモードの追加スタイル */
+.dark-mode .app-bar {
+    background-color: var(--header-bg);
+}
+
+.dark-mode .card {
+    background-color: var(--card-bg);
+    border: 1px solid #333;
+}
+
+.dark-mode .card-header {
+    border-bottom: 1px solid #333;
+}
+
+.dark-mode .card-header.bg-primary {
+    background-color: #0D47A1 !important;
+}
+
+.dark-mode .card-header.bg-success {
+    background-color: #2E7D32 !important;
+}
+
+.dark-mode .card-header.bg-info {
+    background-color: #01579B !important;
+}
+
+.dark-mode .card-header.bg-secondary {
+    background-color: #424242 !important;
+}
+
+.dark-mode .card-header.bg-danger {
+    background-color: #C62828 !important;
+}
+
+.dark-mode .table {
+    color: #E0E0E0;
+}
+
+.dark-mode .table th {
+    background-color: #2A2A2A;
+    border-color: #333;
+}
+
+.dark-mode .table td {
+    border-color: #333;
+}
+
+.dark-mode .table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > * {
+    color: #E0E0E0;
+}
+
+.dark-mode #workSessionsList .list-group-item {
+    background-color: #2A2A2A;
+    color: #E0E0E0;
+}
+
+.dark-mode .timer-display {
+    background: linear-gradient(145deg, #222222, #1a1a1a);
+    box-shadow: 5px 5px 15px #151515, -5px -5px 15px #292929;
+    color: #E0E0E0;
+}
+
+.dark-mode .form-control, 
+.dark-mode .input-group-text {
+    background-color: #333;
+    border-color: #444;
+    color: #E0E0E0;
+}
+
+.dark-mode .form-control:focus {
+    background-color: #3A3A3A;
+    color: #FFFFFF;
+}
+
+.dark-mode .form-text {
+    color: #AAAAAA;
+}
+
+.dark-mode .text-muted {
+    color: #AAAAAA !important;
+}
+
+.dark-mode .card.bg-light .text-muted {
+    color: #DDDDDD !important;
+}
+
+.dark-mode .modal-content {
+    background-color: #2A2A2A;
+    color: #E0E0E0;
+}
+
+/* 作業詳細モーダルのダークモード対応 */
+.dark-mode #jobDetailsContent .card.bg-light {
+    background-color: #1E1E1E !important;
+    color: #E0E0E0;
+    border: 1px solid #444;
+}
+
+.dark-mode #jobDetailsContent .card.bg-light .card-body {
+    background-color: #1E1E1E;
+}
+
+.dark-mode #jobDetailsContent .card .card-header.bg-light,
+.dark-mode #jobDetailsModal .card-header.bg-light,
+.dark-mode #jobDetailsContent .card-header.bg-light,
+.dark-mode #jobDetailsModal .card .card-header,
+.dark-mode #jobDetailsContent .card-header,
+.dark-mode #jobDetailsModal .card > div:first-child,
+.dark-mode #jobDetailsContent > .card > .card-header {
+    background-color: #2A2A2A !important;
+    color: #FFFFFF;
+    border-bottom: 1px solid #444;
+}
+
+.dark-mode #jobDetailsContent .card .card-header.bg-light h5,
+.dark-mode #jobDetailsModal .card-header.bg-light h5,
+.dark-mode #jobDetailsContent .card-header.bg-light h5,
+.dark-mode #jobDetailsModal .card .card-header h5,
+.dark-mode #jobDetailsContent .card-header h5,
+.dark-mode #jobDetailsModal .card h5,
+.dark-mode #jobDetailsContent > .card > .card-header h5,
+.dark-mode #jobDetailsContent .card:first-child .card-header h5 {
+    color: #FFFFFF;
+    font-weight: 600;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+.dark-mode #jobDetailsContent .card.bg-light h5,
+.dark-mode #jobDetailsContent .card.bg-light h6 {
+    color: #90CAF9;
+    font-weight: 600;
+}
+
+/* 最も強いセレクタでダークモード対応 */
+.dark-mode .bg-light {
+    background-color: #1E1E1E !important;
+    color: #FFFFFF !important;
+}
+.dark-mode .bg-light h5 {
+    color: #FFFFFF !important;
+    font-weight: 600;
+}
+
+.dark-mode #jobDetailsContent .card.bg-light h3 {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.dark-mode .modal-header.bg-primary {
+    background-color: #0D47A1 !important;
+}
+
+.dark-mode .modal-header.bg-danger {
+    background-color: #C62828 !important;
+}
+
+.dark-mode .modal-header.bg-info {
+    background-color: #01579B !important;
+}
+
+.dark-mode .close {
+    color: #E0E0E0;
+}
+
+.dark-mode .action-buttons-container {
+    background-color: #121212;
+    border-top: 1px solid #333;
+}
+
+.dark-mode .btn-dark {
+    background-color: #333;
+    border-color: #444;
+}
+
+.dark-mode .btn-light {
+    background-color: #444;
+    border-color: #555;
+    color: #E0E0E0;
+}
+
+.dark-mode .btn-outline-secondary {
+    color: #E0E0E0;
+    border-color: #666;
+}
+
+.dark-mode .btn-outline-secondary:hover {
+    background-color: #444;
+    color: #FFFFFF;
+}
+
+.dark-mode .list-group-item {
+    background-color: #2A2A2A;
+    border-color: #333;
+    color: #E0E0E0;
+}
+
+.dark-mode hr {
+    border-color: #444;
+}
+
+.dark-mode pre {
+    background-color: #1E1E1E;
+    color: #E0E0E0;
+    border: 1px solid #333;
+}
+
+/* 図面認識機能のスタイル */
+#imagePreview {
+    max-height: 200px;
+    object-fit: contain;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#extractionStatus {
+    min-height: 60px;
+}
+
+#uploadDrawingBtn {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+#imagePreviewContainer .card {
+    margin-bottom: 15px;
+}
+
+/* ダークモード対応 */
+.dark-mode #imagePreview {
+    border-color: #444;
+}
+
+/* 設定モーダルのダークモード */
+.dark-mode .nav-tabs {
+    border-color: #444;
+}
+
+.dark-mode .nav-tabs .nav-link {
+    color: #CCC;
+}
+
+.dark-mode .nav-tabs .nav-link:hover {
+    border-color: #555 #555 #444;
+    color: #FFF;
+}
+
+.dark-mode .nav-tabs .nav-link.active {
+    background-color: #2A2A2A;
+    color: #FFF;
+    border-color: #444 #444 #2A2A2A;
+}
+
+.dark-mode .tab-content {
+    background-color: #2A2A2A;
+    border-radius: 0 0 8px 8px;
+    padding: 15px;
+    color: #E0E0E0;
+}
+
+.dark-mode .card.border-danger {
+    border-color: #C62828;
+}
+
+.dark-mode .form-check-label {
+    color: #E0E0E0;
+}
+
+.dark-mode .card .card-header.bg-danger {
+    background-color: #C62828 !important;
+}
+
+.dark-mode .spinner-border-sm {
+    border-color: #E0E0E0;
+    border-right-color: transparent;
+}
+
+/* 月間集計のダークモード対応 */
+.dark-mode .form-select {
+    background-color: #333;
+    border-color: #444;
+    color: #E0E0E0;
+}
+
+.dark-mode .form-select:focus {
+    background-color: #3A3A3A;
+    border-color: #555;
+    color: #FFFFFF;
+}
+
+.dark-mode .form-select option {
+    background-color: #333;
+    color: #E0E0E0;
+}
+
+.dark-mode .card.bg-light {
+    background-color: #1E1E1E !important;
+    color: #E0E0E0;
+    border: 1px solid #444;
+}
+
+.dark-mode .card.bg-light .card-body {
+    background-color: #1E1E1E;
+}
+
+.dark-mode .card.bg-light h3 {
+    color: #4CAF50;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+.dark-mode .card.bg-light h6 {
+    color: #90CAF9;
+    font-weight: 600;
+}
+
+.dark-mode .card-header.bg-info {
+    background-color: #01579B !important;
+}
+
+.dark-mode .form-label {
+    color: #E0E0E0;
+}

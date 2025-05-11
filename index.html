@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2196F3">
+    <title>旋盤作業時間管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3305/3305280.png">
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/3305/3305280.png">
+</head>
+<body class="dark-mode">
+    <!-- アプリバー -->
+    <div class="app-bar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="app-title">旋盤作業時間管理</h1>
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-sm btn-dark me-2" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                    <i class="bi bi-gear"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-dark me-2" data-bs-toggle="modal" data-bs-target="#helpModal">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="darkModeSwitch" onclick="toggleDarkMode(this.checked)" checked>
+                    <label class="form-check-label text-white" for="darkModeSwitch"><i class="bi bi-moon-stars"></i></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- インストールバナー -->
+    <div class="install-banner" id="installBanner">
+        <div class="d-flex justify-content-between align-items-center container">
+            <span>ホーム画面に追加すると便利です</span>
+            <button class="btn btn-sm btn-light" onclick="document.getElementById('installBanner').style.display='none'">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="container mt-3">
+        <!-- データ同期パネル -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-cloud-arrow-up-down me-2"></i>データ同期</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1">GitHub上のデータと同期して作業記録を保存・更新します</p>
+                        <span id="lastSyncTime" class="text-muted small">最終同期: -</span>
+                    </div>
+                    <button type="button" id="syncData" class="btn btn-success"><i class="bi bi-arrow-repeat me-1"></i> データ同期</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 稼働中の作業パネル -->
+        <div id="activeJobPanel" class="card mb-4 d-none">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-play-circle me-2"></i>稼働中の作業</h5>
+                <button id="completeJobBtn" class="btn btn-sm btn-light"><i class="bi bi-check-lg me-1"></i>作業完了</button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="status-indicator status-active"></span>
+                            <h3 id="activeJobDrawingNumber" class="mb-0"></h3>
+                        </div>
+                        <p id="activeJobDescription" class="text-muted"></p>
+                        <p><strong>開始時間:</strong> <span id="activeJobStartTime"></span></p>
+
+                        <!-- 加工個数表示 -->
+                        <p><strong>加工個数:</strong> <span id="activeJobQuantity">0</span> 個</p>
+
+                        <!-- 累計作業時間表示 -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body p-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0"><i class="bi bi-hourglass-split me-1"></i>累計作業時間:</h6>
+                                        <small class="text-muted">全セッション合計</small>
+                                    </div>
+                                    <div>
+                                        <h4 id="totalWorkTimeDisplay" class="mb-0">0h 0m</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <div class="timer-display">
+                            <span id="hoursDisplay">00</span>:<span id="minutesDisplay">00</span>
+                        </div>
+                        <div class="text-center mb-2">
+                            <small class="text-muted" id="timerLabel">現在のセッション時間</small>
+                        </div>
+                        <div class="d-grid gap-2 d-md-block mt-3">
+                            <button id="pauseResumeBtn" class="btn btn-warning btn-lg me-md-2"><i class="bi bi-pause-circle me-1"></i>一時停止</button>
+                            <button id="addBreakBtn" class="btn btn-outline-secondary btn-lg"><i class="bi bi-clock-history me-1"></i>休憩追加</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6 class="fw-bold"><i class="bi bi-list-check me-2"></i>作業セッション:</h6>
+                        <ul id="workSessionsList" class="list-group mt-2"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新規作業登録パネル -->
+        <div id="newJobPanel" class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>新規作業の登録</h5>
+            </div>
+            <div class="card-body">
+                <form id="newJobForm">
+                    <!-- 図面画像アップロード -->
+                    <div class="row mb-2">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-outline-secondary" id="uploadDrawingBtn" disabled>
+                                <i class="bi bi-camera"></i> 図面画像から情報を抽出
+                            </button>
+                            <input type="file" id="drawingImageInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    <div id="imagePreviewContainer" class="row mb-3 d-none">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="bi bi-image"></i> 画像プレビュー</h6>
+                                    <img id="imagePreview" class="img-fluid" src="" alt="図面プレビュー">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="bi bi-magic"></i> 抽出処理</h6>
+                                    <div id="extractionStatus">ここに抽出結果が表示されます</div>
+                                    <div class="mt-2">
+                                        <button id="useExtractedNumberBtn" class="btn btn-sm btn-primary d-none">
+                                            <i class="bi bi-check-lg"></i> この番号を使用
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label for="drawingNumber" class="form-label">図面番号</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                <input type="text" class="form-control" id="drawingNumber" placeholder="例: S123-456" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label for="jobDescription" class="form-label">作業内容 (任意)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-info-circle"></i></span>
+                                <input type="text" class="form-control" id="jobDescription" placeholder="例: フランジ加工">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label for="itemQuantity" class="form-label">加工個数</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-boxes"></i></span>
+                                <input type="number" class="form-control" id="itemQuantity" min="1" value="1" required>
+                                <span class="input-group-text">個</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-play-fill me-2"></i>作業を開始する</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 月間集計パネル -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>月間集計</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="monthSelect" class="form-label">月を選択:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                <select id="monthSelect" class="form-select">
+                                    <!-- 動的に月のオプションが追加されます -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6><i class="bi bi-file-earmark-text me-1"></i>加工図面数</h6>
+                                <h3 id="monthlyDrawingCount">0</h3>
+                                <small class="text-muted">種類</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6><i class="bi bi-boxes me-1"></i>総加工個数</h6>
+                                <h3 id="monthlyItemCount">0</h3>
+                                <small class="text-muted">個</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6><i class="bi bi-clock me-1"></i>総作業時間</h6>
+                                <h3 id="monthlyTotalTime">0h 0m</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6><i class="bi bi-hourglass-split me-1"></i>平均加工時間</h6>
+                                <h3 id="monthlyAverageTime">0h 0m</h3>
+                                <small class="text-muted">/ 個</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 完了済み作業パネル -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-check2-all me-2"></i>完了済み作業</h5>
+                <button id="refreshCompletedJobs" class="btn btn-sm btn-light">
+                    <i class="bi bi-arrow-clockwise me-1"></i>更新
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>図面番号</th>
+                                <th>作業内容</th>
+                                <th>完了日</th>
+                                <th>加工数</th>
+                                <th>総作業時間</th>
+                                <th>1個あたり</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completedJobsList"></tbody>
+                    </table>
+                </div>
+                <div id="noCompletedJobs" class="text-center py-4 d-none">
+                    <i class="bi bi-clipboard text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-2">完了した作業はまだありません</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- スマホ用の固定アクションボタン -->
+        <div class="action-buttons-spacer d-md-none"></div>
+        <div class="action-buttons-container d-md-none">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <button id="mobileSync" class="btn btn-success w-100" onclick="LatheTimeTracker.syncWithGitHub()">
+                            <i class="bi bi-arrow-repeat me-1"></i>同期
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button id="mobileNewJob" class="btn btn-primary w-100" onclick="document.getElementById('newJobPanel').scrollIntoView({behavior: 'smooth'})">
+                            <i class="bi bi-plus-lg me-1"></i>新規
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button id="mobileSettings" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                            <i class="bi bi-gear me-1"></i>設定
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button id="mobileCameraBtn" class="btn btn-secondary w-100">
+                            <i class="bi bi-camera me-1"></i>撮影
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ヘルプモーダル -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="helpModalLabel"><i class="bi bi-question-circle me-2"></i>ヘルプ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 class="mb-3"><i class="bi bi-github me-2"></i>GitHub設定手順</h4>
+                    <ol class="mb-4">
+                        <li>右上の歯車アイコンから設定画面を開く</li>
+                        <li>「GitHub設定」タブを選択</li>
+                        <li><a href="https://github.com/settings/tokens" target="_blank">Personal Access Token</a>を作成する（"repo"スコープが必要）</li>
+                        <li>GitHubのユーザー名とリポジトリ名を入力</li>
+                        <li>「設定を保存」ボタンをクリックして完了</li>
+                    </ol>
+
+                    <h4 class="mb-3"><i class="bi bi-clock-history me-2"></i>時間管理の使い方</h4>
+                    <ol class="mb-4">
+                        <li>図面番号、作業内容、加工個数を入力</li>
+                        <li>「作業を開始する」ボタンをクリックして時間計測を開始</li>
+                        <li>予定外の休憩を取る場合は「一時停止」ボタンを使用</li>
+                        <li>作業が完了したら「作業完了」ボタンをクリック</li>
+                        <li>昼休み（12:00-13:00）と時間外（17:00以降）は自動的に除外されます</li>
+                        <li>作業完了後は総作業時間と1個あたりの作業時間が表示されます</li>
+                    </ol>
+
+                    <h4 class="mb-3"><i class="bi bi-arrow-repeat me-2"></i>データ同期</h4>
+                    <p>「データ同期」ボタンをクリックして、作業時間データをGitHubに保存し、更新を取得します。</p>
+
+                    <h4 class="mb-3"><i class="bi bi-phone me-2"></i>スマホでの使用方法</h4>
+                    <ol>
+                        <li>このページをブックマークに追加</li>
+                        <li>iOSの場合：Safariで「ホーム画面に追加」を選択</li>
+                        <li>Androidの場合：Chromeで「ホーム画面に追加」を選択</li>
+                        <li>アプリのようにホーム画面から起動できるようになります</li>
+                    </ol>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- エラーモーダル -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel"><i class="bi bi-exclamation-triangle me-2"></i>エラー</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                    <div id="errorDetails" class="mt-3 border-top pt-3 d-none">
+                        <h6>技術的詳細:</h6>
+                        <pre id="errorTechnicalDetails" class="bg-light p-2 rounded"></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                    <button type="button" id="showErrorDetails" class="btn btn-outline-secondary">詳細を表示</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 作業詳細モーダル -->
+    <div class="modal fade" id="jobDetailsModal" tabindex="-1" aria-labelledby="jobDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="jobDetailsModalLabel"><i class="bi bi-info-circle me-2"></i>作業詳細</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="jobDetailsContent">
+                    <!-- 作業詳細がここに表示されます -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                    <button type="button" id="restartJobFromModal" class="btn btn-primary">この作業を再開</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定モーダル -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="settingsModalLabel"><i class="bi bi-gear me-2"></i>設定</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-content"
+                                type="button" role="tab" aria-controls="general-content" aria-selected="true">
+                                <i class="bi bi-sliders me-2"></i>一般設定
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="github-tab" data-bs-toggle="tab" data-bs-target="#github-content"
+                                type="button" role="tab" aria-controls="github-content" aria-selected="false">
+                                <i class="bi bi-github me-2"></i>GitHub設定
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-content"
+                                type="button" role="tab" aria-controls="advanced-content" aria-selected="false">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>高度な設定
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content pt-3" id="settingsTabContent">
+                        <!-- 一般設定タブ -->
+                        <div class="tab-pane fade show active" id="general-content" role="tabpanel" aria-labelledby="general-tab">
+                            <h5 class="mb-3">表示設定</h5>
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" id="darkModeSwitchSettings" onclick="toggleDarkMode(this.checked)">
+                                <label class="form-check-label" for="darkModeSwitchSettings">
+                                    <i class="bi bi-moon-stars me-2"></i>ダークモードを使用する
+                                </label>
+                            </div>
+
+                            <h5 class="mb-3">時間設定</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="lunchBreakStart" class="form-label">昼休み開始時間</label>
+                                    <input type="time" class="form-control" id="lunchBreakStart" value="12:00" disabled>
+                                    <small class="form-text text-muted">現在固定: 12:00〜13:00</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="workEndTime" class="form-label">勤務終了時間</label>
+                                    <input type="time" class="form-control" id="workEndTime" value="17:00" disabled>
+                                    <small class="form-text text-muted">現在固定: 17:00（自動一時停止）</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GitHub設定タブ -->
+                        <div class="tab-pane fade" id="github-content" role="tabpanel" aria-labelledby="github-tab">
+                            <p class="mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                GitHub APIを使用してデータを同期します。アクセストークンとリポジトリ情報を設定してください。
+                            </p>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12 mb-3">
+                                    <label for="githubTokenSettings" class="form-label">アクセストークン</label>
+                                    <input type="password" class="form-control" id="githubTokenSettings">
+                                    <div class="form-text"><a href="https://github.com/settings/tokens" target="_blank">トークンを作成</a> (repoスコープ必要)</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="githubUsernameSettings" class="form-label">ユーザー名</label>
+                                    <input type="text" class="form-control" id="githubUsernameSettings">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="githubRepoSettings" class="form-label">リポジトリ名</label>
+                                    <input type="text" class="form-control" id="githubRepoSettings">
+                                    <div class="form-text">プライベートリポジトリを使用してください</div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="dataFilePathSettings" class="form-label">データファイルパス</label>
+                                    <input type="text" class="form-control" id="dataFilePathSettings" value="lathe-time-data.json">
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex mt-4">
+                                <button type="button" id="saveGitHubSettings" class="btn btn-primary flex-grow-1"><i class="bi bi-save me-1"></i> 設定を保存</button>
+                                <button type="button" id="testConnectionSettings" class="btn btn-outline-secondary flex-grow-1"><i class="bi bi-check-circle me-1"></i> 接続テスト</button>
+                            </div>
+                        </div>
+
+                        <!-- 高度な設定タブ -->
+                        <div class="tab-pane fade" id="advanced-content" role="tabpanel" aria-labelledby="advanced-tab">
+                            <div class="alert alert-danger" role="alert">
+                                <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>危険ゾーン</h5>
+                                <p class="mb-0">以下の設定は取り返しのつかない変更を行います。慎重に操作してください。</p>
+                            </div>
+
+                            <div class="card border-danger mb-4">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0">データ初期化</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="fw-bold">この操作はすべてのデータを消去します。この操作は元に戻せません。</p>
+                                    <p>以下の操作が実行されます：</p>
+                                    <ul>
+                                        <li>ローカルに保存されているすべての作業データが消去されます</li>
+                                        <li>GitHubリポジトリのデータファイルが空の状態にリセットされます</li>
+                                        <li>アクティブな作業および完了済み作業のすべての履歴が失われます</li>
+                                    </ul>
+                                    <div class="d-flex align-items-center mt-4">
+                                        <button type="button" id="resetAllDataSettings" class="btn btn-danger me-3" data-bs-toggle="modal" data-bs-target="#resetConfirmModal">
+                                            <i class="bi bi-trash me-1"></i> データを完全に初期化
+                                        </button>
+                                        <small class="text-muted">すべての作業データが消去されます</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- データ初期化確認モーダル -->
+    <div class="modal fade" id="resetConfirmModal" tabindex="-1" aria-labelledby="resetConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="resetConfirmModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>データ初期化の確認</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fw-bold">この操作は取り消せません。本当にすべてのデータを初期化しますか？</p>
+                    <p>以下の操作が実行されます：</p>
+                    <ul>
+                        <li>ローカルに保存されているすべての作業データが消去されます</li>
+                        <li>GitHubリポジトリのデータファイルが空の状態にリセットされます</li>
+                        <li>アクティブな作業および完了済み作業のすべての履歴が失われます</li>
+                    </ul>
+                    <div class="alert alert-warning mt-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmResetCheck" checked>
+                            <label class="form-check-label" for="confirmResetCheck">
+                                すべてのデータを消去することを確認します
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" id="confirmResetBtn" class="btn btn-danger" onclick="resetAllDataNow()">データを初期化</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/github-api.js"></script>
+    <script src="js/drawing-recognition-client.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- グローバル関数 -->
+    <script>
+        // ダークモード切り替え用グローバル関数
+        function toggleDarkMode(isDarkMode) {
+            // bodyクラスを更新
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+
+            // 両方のスイッチを同期
+            const mainSwitch = document.getElementById('darkModeSwitch');
+            const settingsSwitch = document.getElementById('darkModeSwitchSettings');
+
+            if (mainSwitch) mainSwitch.checked = isDarkMode;
+            if (settingsSwitch) settingsSwitch.checked = isDarkMode;
+        }
+
+        // ページ読み込み時にダークモード設定を適用
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const isDarkModeActive = document.body.classList.contains('dark-mode');
+
+            // localStorage設定があればそれを適用、なければ現在の状態を維持
+            if (savedDarkMode === 'enabled') {
+                toggleDarkMode(true);
+            } else if (savedDarkMode === 'disabled') {
+                toggleDarkMode(false);
+            } else {
+                // 設定がなければ既存の状態を保持
+                const mainSwitch = document.getElementById('darkModeSwitch');
+                const settingsSwitch = document.getElementById('darkModeSwitchSettings');
+
+                if (mainSwitch) mainSwitch.checked = isDarkModeActive;
+                if (settingsSwitch) settingsSwitch.checked = isDarkModeActive;
+            }
+        });
+
+        // データ完全初期化用のグローバル関数
+        async function resetAllDataNow() {
+            console.log('グローバル初期化関数が呼び出されました');
+
+            try {
+                // ローカルストレージのデータをクリア
+                localStorage.removeItem('latheTimeTrackerData');
+
+                // 別のlocalStorageデータも削除（冗長データの可能性）
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('latheTime') || key.includes('job'))) {
+                        console.log('削除するキー:', key);
+                        localStorage.removeItem(key);
+                    }
+                }
+
+                // 空のデータオブジェクトを作成
+                const emptyData = {
+                    activeJob: null,
+                    completedJobs: [],
+                    lastSync: new Date().toISOString()
+                };
+
+                // LatheTimeTrackerのデータを初期化
+                LatheTimeTracker.data = emptyData;
+
+                // GitHubに空のデータを保存（強制モード）
+                await GitHubAPI.saveData(emptyData, true);
+                console.log('GitHubデータをリセットしました');
+
+                // 強制同期モードでも呼び出す（マージしない）
+                await GitHubAPI.syncData(emptyData, true);
+                console.log('強制同期完了');
+
+                // UI更新
+                LatheTimeTracker.updateUI();
+                LatheTimeTracker.initializeMonthlyStats();
+
+                // モーダルを閉じる
+                const modal = bootstrap.Modal.getInstance(document.getElementById('resetConfirmModal'));
+                if (modal) modal.hide();
+
+                // 成功メッセージを表示
+                alert('すべてのデータが正常に初期化されました！');
+
+            } catch (error) {
+                console.error('データ初期化エラー:', error);
+                alert('データの初期化に失敗しました: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
