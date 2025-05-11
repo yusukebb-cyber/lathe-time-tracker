@@ -44,22 +44,19 @@ const LatheTimeTracker = {
     init() {
         // Cache DOM elements
         this.cacheElements();
-
+        
         // Initialize UI components
         this.initializeUI();
-
+        
         // Load data from localStorage
         this.loadData();
-
+        
         // Set up event listeners
         this.setupEventListeners();
-
-        // 図面認識機能の初期化
-        this.initDrawingRecognition();
-
+        
         // Update UI based on loaded data
         this.updateUI();
-
+        
         // Initialize monthly statistics
         this.initializeMonthlyStats();
 
@@ -67,112 +64,6 @@ const LatheTimeTracker = {
         setTimeout(setupDataResetFunction, 500);
 
         console.log('Lathe Time Tracker initialized');
-    },
-
-    /**
-     * 図面認識機能の初期化
-     */
-    initDrawingRecognition() {
-        console.log('図面認識機能を初期化');
-
-        // API URLの設定 (実際のサーバー URL)
-        DrawingRecognition.setApiUrl('http://localhost:3000');
-
-        // 画像アップロードボタンを有効化
-        if (this.elements.uploadDrawingBtn) {
-            this.elements.uploadDrawingBtn.disabled = false;
-        }
-
-        // アップロードボタンのイベントリスナー
-        this.elements.uploadDrawingBtn.addEventListener('click', () => {
-            this.elements.drawingImageInput.click();
-        });
-
-        // モバイルカメラボタンのイベントリスナー
-        const mobileCameraBtn = document.getElementById('mobileCameraBtn');
-        if (mobileCameraBtn) {
-            mobileCameraBtn.addEventListener('click', () => {
-                this.elements.drawingImageInput.click();
-            });
-        }
-
-        // 画像ファイル選択時の処理
-        this.elements.drawingImageInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            try {
-                // 画像プレビューを表示
-                const previewContainer = this.elements.imagePreviewContainer;
-                const imagePreview = this.elements.imagePreview;
-                const extractionStatus = this.elements.extractionStatus;
-                const useExtractedNumberBtn = this.elements.useExtractedNumberBtn;
-
-                // プレビュー表示を準備
-                previewContainer.classList.remove('d-none');
-                imagePreview.src = URL.createObjectURL(file);
-                extractionStatus.innerHTML = '<div class="text-center my-3"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">図面番号を抽出中...</p></div>';
-                useExtractedNumberBtn.classList.add('d-none');
-
-                // 画像を処理して図面番号を抽出
-                const result = await DrawingRecognition.processImage(file);
-                console.log('抽出結果:', result);
-
-                // 抽出結果の表示
-                if (result.drawingNumber) {
-                    extractionStatus.innerHTML = `
-                        <div class="alert alert-success">
-                            <p class="mb-1"><strong>図面番号:</strong> ${result.drawingNumber}</p>
-                            ${result.drawingTitle ? `<p class="mb-0"><strong>図面名:</strong> ${result.drawingTitle}</p>` : ''}
-                        </div>
-                    `;
-
-                    // 「この番号を使用」ボタンを表示
-                    useExtractedNumberBtn.classList.remove('d-none');
-                    useExtractedNumberBtn.addEventListener('click', () => {
-                        this.elements.drawingNumber.value = result.drawingNumber;
-                        if (result.drawingTitle && !this.elements.jobDescription.value) {
-                            this.elements.jobDescription.value = result.drawingTitle;
-                        }
-                        previewContainer.classList.add('d-none');
-                    });
-                } else if (result.text) {
-                    extractionStatus.innerHTML = `
-                        <div class="alert alert-warning">
-                            <p class="mb-1">図面番号を自動検出できませんでした。</p>
-                            <small>抽出されたテキスト: ${result.text.substring(0, 100)}...</small>
-                        </div>
-                    `;
-                } else {
-                    extractionStatus.innerHTML = `
-                        <div class="alert alert-danger">
-                            <p class="mb-0">テキストを検出できませんでした。別の画像を試してください。</p>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('図面認識エラー:', error);
-
-                // エラーメッセージの表示
-                this.elements.extractionStatus.innerHTML = `
-                    <div class="alert alert-danger">
-                        <p class="mb-0">エラー: ${error.message || '図面認識処理中にエラーが発生しました'}</p>
-                    </div>
-                `;
-
-                // エラーが API 接続関連の場合は追加情報を表示
-                if (error.message && error.message.includes('API')) {
-                    this.elements.extractionStatus.innerHTML += `
-                        <div class="alert alert-info mt-2">
-                            <p class="mb-0">APIサーバーが実行されているか確認してください。</p>
-                            <small>サーバーURL: ${DrawingRecognition.apiUrl}</small>
-                        </div>
-                    `;
-                }
-            }
-        });
-
-        console.log('図面認識機能の初期化完了');
     },
     
     /**
@@ -182,19 +73,10 @@ const LatheTimeTracker = {
         // 同期ボタンとステータス表示
         this.elements.syncData = document.getElementById('syncData');
         this.elements.lastSyncTime = document.getElementById('lastSyncTime');
-
+        
         // Active job panel elements
         this.elements.activeJobPanel = document.getElementById('activeJobPanel');
         this.elements.activeJobDrawingNumber = document.getElementById('activeJobDrawingNumber');
-
-        // 図面認識機能の要素
-        this.elements.uploadDrawingBtn = document.getElementById('uploadDrawingBtn');
-        this.elements.drawingImageInput = document.getElementById('drawingImageInput');
-        this.elements.imagePreview = document.getElementById('imagePreview');
-        this.elements.imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        this.elements.extractionStatus = document.getElementById('extractionStatus');
-        this.elements.useExtractedNumberBtn = document.getElementById('useExtractedNumberBtn');
-        this.elements.mobileCameraBtn = document.getElementById('mobileCameraBtn');
         this.elements.activeJobDescription = document.getElementById('activeJobDescription');
         this.elements.activeJobStartTime = document.getElementById('activeJobStartTime');
         this.elements.activeJobQuantity = document.getElementById('activeJobQuantity');

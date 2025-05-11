@@ -570,32 +570,6 @@ body {
     border: 1px solid #333;
 }
 
-/* 図面認識機能のスタイル */
-#imagePreview {
-    max-height: 200px;
-    object-fit: contain;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-#extractionStatus {
-    min-height: 60px;
-}
-
-#uploadDrawingBtn {
-    width: 100%;
-    margin-bottom: 15px;
-}
-
-#imagePreviewContainer .card {
-    margin-bottom: 15px;
-}
-
-/* ダークモード対応 */
-.dark-mode #imagePreview {
-    border-color: #444;
-}
-
 /* 設定モーダルのダークモード */
 .dark-mode .nav-tabs {
     border-color: #444;

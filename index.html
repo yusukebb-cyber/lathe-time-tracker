@@ -126,38 +126,6 @@
             </div>
             <div class="card-body">
                 <form id="newJobForm">
-                    <!-- 図面画像アップロード -->
-                    <div class="row mb-2">
-                        <div class="col-12">
-                            <button type="button" class="btn btn-outline-secondary" id="uploadDrawingBtn" disabled>
-                                <i class="bi bi-camera"></i> 図面画像から情報を抽出
-                            </button>
-                            <input type="file" id="drawingImageInput" accept="image/*" style="display: none;">
-                        </div>
-                    </div>
-                    <div id="imagePreviewContainer" class="row mb-3 d-none">
-                        <div class="col-md-6">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title"><i class="bi bi-image"></i> 画像プレビュー</h6>
-                                    <img id="imagePreview" class="img-fluid" src="" alt="図面プレビュー">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title"><i class="bi bi-magic"></i> 抽出処理</h6>
-                                    <div id="extractionStatus">ここに抽出結果が表示されます</div>
-                                    <div class="mt-2">
-                                        <button id="useExtractedNumberBtn" class="btn btn-sm btn-primary d-none">
-                                            <i class="bi bi-check-lg"></i> この番号を使用
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="row mb-4">
                         <div class="col-md-4 mb-3 mb-md-0">
                             <label for="drawingNumber" class="form-label">図面番号</label>
@@ -298,11 +266,6 @@
                     <div class="col">
                         <button id="mobileSettings" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#settingsModal">
                             <i class="bi bi-gear me-1"></i>設定
-                        </button>
-                    </div>
-                    <div class="col">
-                        <button id="mobileCameraBtn" class="btn btn-secondary w-100">
-                            <i class="bi bi-camera me-1"></i>撮影
                         </button>
                     </div>
                 </div>
@@ -560,7 +523,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/github-api.js"></script>
-    <script src="js/drawing-recognition-client.js"></script>
     <script src="js/app.js"></script>
 
     <!-- グローバル関数 -->
