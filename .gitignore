@@ -1,0 +1,11 @@
+# OS生成ファイル
+.DS_Store
+**/.DS_Store
+Thumbs.db
+desktop.ini
+
+# 開発環境
+.vscode/
+.idea/
+node_modules/
+*.log
