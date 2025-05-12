@@ -1,5 +1,20 @@
 {
-  "activeJob": null,
+  "activeJob": {
+    "drawingNumber": "vzモーター本体140kw",
+    "description": "オレンジ色長谷川鉄工",
+    "itemQuantity": 5,
+    "startedAt": "2025-05-11T23:06:14.056Z",
+    "lastUpdated": "2025-05-12T08:02:54.152Z",
+    "sessions": [
+      {
+        "start": "2025-05-11T23:06:14.056Z",
+        "end": "2025-05-12T08:02:54.152Z"
+      }
+    ],
+    "breaks": [],
+    "totalTimeMinutes": 0,
+    "status": "paused"
+  },
   "completedJobs": [],
-  "lastSync": "2025-05-11T22:58:10.625Z"
+  "lastSync": "2025-05-12T08:05:56.822Z"
 }
