@@ -496,6 +496,22 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="card border-info mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">データ復旧</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="fw-bold">GitHubからデータを復旧します</p>
+                                    <p>この操作を行うと、現在のローカルデータをGitHub上のデータで置き換えます。</p>
+                                    <div class="d-flex align-items-center mt-4">
+                                        <button type="button" id="recoverGitHubData" class="btn btn-info me-3" onclick="recoverDataFromGitHub()">
+                                            <i class="bi bi-cloud-download me-1"></i> GitHubからデータを復旧
+                                        </button>
+                                        <small class="text-muted">ローカルデータがGitHubのデータで上書きされます</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -652,6 +668,43 @@
                 document.getElementById('newJobPanel').scrollIntoView({behavior: 'smooth'});
             }
         });
+
+        // データ復旧用の関数
+        async function recoverDataFromGitHub() {
+            try {
+                // ローカルデータを初期化
+                const emptyData = {
+                    activeJob: null,
+                    completedJobs: [],
+                    lastSync: new Date().toISOString()
+                };
+
+                // ローカルストレージの既存データを削除
+                localStorage.removeItem('latheTimeTrackerData');
+
+                // GitHubからデータを読み込む
+                console.log('GitHubからデータを読み込んでいます...');
+                const remoteData = await GitHubAPI.loadData();
+                console.log('GitHub上のデータ:', remoteData);
+
+                // リモートデータをローカルに適用
+                LatheTimeTracker.data = remoteData;
+                LatheTimeTracker.saveLocalData();
+
+                // UI更新
+                LatheTimeTracker.updateUI();
+                LatheTimeTracker.initializeMonthlyStats();
+
+                alert('GitHubからデータを正常に復旧しました！');
+                console.log('データ復旧成功');
+
+                // ページを再読み込み
+                location.reload();
+            } catch (error) {
+                console.error('データ復旧エラー:', error);
+                alert('データの復旧に失敗しました: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>
