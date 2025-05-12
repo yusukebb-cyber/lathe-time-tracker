@@ -689,7 +689,8 @@
 
                 // リモートデータをローカルに適用
                 LatheTimeTracker.data = remoteData;
-                LatheTimeTracker.saveLocalData();
+                // ローカルストレージに保存
+                localStorage.setItem('latheTimeTrackerData', JSON.stringify(remoteData));
 
                 // UI更新
                 LatheTimeTracker.updateUI();
