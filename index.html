@@ -22,6 +22,9 @@
         <div class="container d-flex justify-content-between align-items-center">
             <h1 class="app-title">旋盤作業時間管理</h1>
             <div class="d-flex align-items-center">
+                <a href="google-vision-test.html" class="btn btn-sm btn-info me-2" title="図面番号スキャン">
+                    <i class="bi bi-camera"></i>
+                </a>
                 <button type="button" class="btn btn-sm btn-dark me-2" data-bs-toggle="modal" data-bs-target="#settingsModal">
                     <i class="bi bi-gear"></i>
                 </button>
@@ -264,6 +267,11 @@
                         </button>
                     </div>
                     <div class="col">
+                        <a href="google-vision-test.html" class="btn btn-info w-100">
+                            <i class="bi bi-camera me-1"></i>図面
+                        </a>
+                    </div>
+                    <div class="col">
                         <button id="mobileSettings" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#settingsModal">
                             <i class="bi bi-gear me-1"></i>設定
                         </button>
@@ -303,6 +311,16 @@
 
                     <h4 class="mb-3"><i class="bi bi-arrow-repeat me-2"></i>データ同期</h4>
                     <p>「データ同期」ボタンをクリックして、作業時間データをGitHubに保存し、更新を取得します。</p>
+
+                    <h4 class="mb-3"><i class="bi bi-camera me-2"></i>図面番号スキャン機能</h4>
+                    <p>右上のカメラアイコンをクリックすると、図面番号スキャンツールが開きます。このツールでは：</p>
+                    <ol class="mb-4">
+                        <li>図面番号が記載された画像をアップロード</li>
+                        <li>Google Vision APIを使用してテキストを認識</li>
+                        <li>検出されたテキストから必要な部分を選択して図面番号を構成</li>
+                        <li>作成した図面番号をコピーして利用可能</li>
+                    </ol>
+                    <p>※この機能を使用するにはGoogle Cloud Vision APIのキーが必要です。</p>
 
                     <h4 class="mb-3"><i class="bi bi-phone me-2"></i>スマホでの使用方法</h4>
                     <ol>
@@ -617,6 +635,23 @@
                 alert('データの初期化に失敗しました: ' + error.message);
             }
         }
+
+        // ページ読み込み時に図面番号選択ツールからのデータを取得
+        document.addEventListener('DOMContentLoaded', function() {
+            // 図面番号選択ツールからの情報を取得して反映
+            const selectedDrawingNumber = localStorage.getItem('selectedDrawingNumber');
+            if (selectedDrawingNumber) {
+                console.log('図面番号選択ツールからの値を読み込みました:', selectedDrawingNumber);
+                // 図面番号入力欄に反映
+                document.getElementById('drawingNumber').value = selectedDrawingNumber;
+                // ローカルストレージから削除（1回だけ使用）
+                localStorage.removeItem('selectedDrawingNumber');
+                // フォーカスを次の入力欄に移動
+                document.getElementById('jobDescription').focus();
+                // 新規作業パネルまでスクロール
+                document.getElementById('newJobPanel').scrollIntoView({behavior: 'smooth'});
+            }
+        });
     </script>
 </body>
 </html>
