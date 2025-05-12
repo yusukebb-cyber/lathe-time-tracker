@@ -290,45 +290,280 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <h4 class="mb-3"><i class="bi bi-github me-2"></i>GitHub設定手順</h4>
-                    <ol class="mb-4">
-                        <li>右上の歯車アイコンから設定画面を開く</li>
-                        <li>「GitHub設定」タブを選択</li>
-                        <li><a href="https://github.com/settings/tokens" target="_blank">Personal Access Token</a>を作成する（"repo"スコープが必要）</li>
-                        <li>GitHubのユーザー名とリポジトリ名を入力</li>
-                        <li>「設定を保存」ボタンをクリックして完了</li>
-                    </ol>
+                    <!-- ヘルプ内のナビゲーションタブ -->
+                    <ul class="nav nav-tabs mb-3" id="helpTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="basic-usage-tab" data-bs-toggle="tab" data-bs-target="#basic-usage" type="button" role="tab" aria-controls="basic-usage" aria-selected="true">
+                                <i class="bi bi-clock-history me-1"></i>基本的な使い方
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="github-setup-tab" data-bs-toggle="tab" data-bs-target="#github-setup" type="button" role="tab" aria-controls="github-setup" aria-selected="false">
+                                <i class="bi bi-github me-1"></i>GitHub設定ガイド
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="vision-api-tab" data-bs-toggle="tab" data-bs-target="#vision-api" type="button" role="tab" aria-controls="vision-api" aria-selected="false">
+                                <i class="bi bi-camera me-1"></i>図面番号スキャン
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mobile-tab" data-bs-toggle="tab" data-bs-target="#mobile-usage" type="button" role="tab" aria-controls="mobile-usage" aria-selected="false">
+                                <i class="bi bi-phone me-1"></i>スマホでの使用方法
+                            </button>
+                        </li>
+                    </ul>
 
-                    <h4 class="mb-3"><i class="bi bi-clock-history me-2"></i>時間管理の使い方</h4>
-                    <ol class="mb-4">
-                        <li>図面番号、作業内容、加工個数を入力</li>
-                        <li>「作業を開始する」ボタンをクリックして時間計測を開始</li>
-                        <li>予定外の休憩を取る場合は「一時停止」ボタンを使用</li>
-                        <li>作業が完了したら「作業完了」ボタンをクリック</li>
-                        <li>昼休み（12:00-13:00）と時間外（17:00以降）は自動的に除外されます</li>
-                        <li>作業完了後は総作業時間と1個あたりの作業時間が表示されます</li>
-                    </ol>
+                    <div class="tab-content" id="helpTabContent">
+                        <!-- 基本的な使い方タブ -->
+                        <div class="tab-pane fade show active" id="basic-usage" role="tabpanel" aria-labelledby="basic-usage-tab">
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>ヒント:</strong> はじめて使う場合は、このガイドを読んでから「GitHub設定ガイド」タブで初期設定を行ってください。
+                            </div>
 
-                    <h4 class="mb-3"><i class="bi bi-arrow-repeat me-2"></i>データ同期</h4>
-                    <p>「データ同期」ボタンをクリックして、作業時間データをGitHubに保存し、更新を取得します。</p>
+                            <h4 class="mb-3"><i class="bi bi-clock-history me-2"></i>時間管理の使い方</h4>
+                            <ol class="mb-4">
+                                <li>図面番号、作業内容、加工個数を入力</li>
+                                <li>「作業を開始する」ボタンをクリックして時間計測を開始</li>
+                                <li>予定外の休憩を取る場合は「一時停止」ボタンを使用</li>
+                                <li>作業が完了したら「作業完了」ボタンをクリック</li>
+                                <li>昼休み（12:00-13:00）と時間外（17:00以降）は自動的に除外されます</li>
+                                <li>作業完了後は総作業時間と1個あたりの作業時間が表示されます</li>
+                            </ol>
 
-                    <h4 class="mb-3"><i class="bi bi-camera me-2"></i>図面番号スキャン機能</h4>
-                    <p>右上のカメラアイコンをクリックすると、図面番号スキャンツールが開きます。このツールでは：</p>
-                    <ol class="mb-4">
-                        <li>図面番号が記載された画像をアップロード</li>
-                        <li>Google Vision APIを使用してテキストを認識</li>
-                        <li>検出されたテキストから必要な部分を選択して図面番号を構成</li>
-                        <li>作成した図面番号をコピーして利用可能</li>
-                    </ol>
-                    <p>※この機能を使用するにはGoogle Cloud Vision APIのキーが必要です。</p>
+                            <h4 class="mb-3"><i class="bi bi-arrow-repeat me-2"></i>データ同期</h4>
+                            <p>「データ同期」ボタンをクリックして、作業時間データをGitHubに保存し、更新を取得します。</p>
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>重要:</strong> 初めて使用する場合は、GitHub設定が必要です。「GitHub設定ガイド」タブを参照してください。
+                            </div>
 
-                    <h4 class="mb-3"><i class="bi bi-phone me-2"></i>スマホでの使用方法</h4>
-                    <ol>
-                        <li>このページをブックマークに追加</li>
-                        <li>iOSの場合：Safariで「ホーム画面に追加」を選択</li>
-                        <li>Androidの場合：Chromeで「ホーム画面に追加」を選択</li>
-                        <li>アプリのようにホーム画面から起動できるようになります</li>
-                    </ol>
+                            <h4 class="mb-3"><i class="bi bi-clock-history me-2"></i>月間集計</h4>
+                            <p>月間集計パネルでは、月ごとの作業状況を確認できます：</p>
+                            <ul>
+                                <li>加工図面数：その月に作業した図面の種類数</li>
+                                <li>総加工個数：その月の全加工個数の合計</li>
+                                <li>総作業時間：その月の総作業時間</li>
+                                <li>平均加工時間：1個あたりの平均作業時間</li>
+                            </ul>
+                        </div>
+
+                        <!-- GitHub設定ガイドタブ -->
+                        <div class="tab-pane fade" id="github-setup" role="tabpanel" aria-labelledby="github-setup-tab">
+                            <h4 class="mb-3"><i class="bi bi-github me-2"></i>はじめてのGitHub設定ガイド</h4>
+                            <p>このアプリでは、作業データをGitHubというサービスに保存します。以下の手順でアカウント作成から設定まで完了します。</p>
+
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-lightbulb me-2"></i>
+                                <strong>なぜGitHubが必要？</strong> GitHubを使うことで、データをクラウドに安全に保存でき、複数の端末間でデータを同期できます。
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-1-circle me-2"></i>GitHubアカウントの作成</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>Webブラウザで <a href="https://github.com/signup" target="_blank">https://github.com/signup</a> にアクセス</li>
+                                        <li>メールアドレス、パスワード、ユーザー名を入力してアカウントを作成</li>
+                                        <li>メール認証を完了させる</li>
+                                    </ol>
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-pencil me-2"></i>
+                                        <strong>メモ:</strong> 作成したユーザー名を忘れないようにメモしておいてください。後で必要になります。
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-2-circle me-2"></i>リポジトリの作成</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>GitHubにログイン後、右上の「+」マークをクリック</li>
+                                        <li>「New repository」を選択</li>
+                                        <li>「Repository name」に「lathe-time-data」と入力</li>
+                                        <li>「Private」を選択（重要: データを非公開にするため）</li>
+                                        <li>「Create repository」ボタンをクリック</li>
+                                    </ol>
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-pencil me-2"></i>
+                                        <strong>メモ:</strong> 入力したリポジトリ名「lathe-time-data」もメモしておいてください。
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-3-circle me-2"></i>アクセストークンの作成</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>GitHubの右上のプロフィールアイコンをクリック→「Settings」を選択</li>
+                                        <li>左側のメニューの一番下まで移動し、「Developer settings」をクリック</li>
+                                        <li>左側のメニューから「Personal access tokens」→「Tokens (classic)」を選択</li>
+                                        <li>「Generate new token」→「Generate new token (classic)」をクリック</li>
+                                        <li>「Note」に「Lathe Time Tracker」と入力</li>
+                                        <li>「repo」のチェックボックスをオン</li>
+                                        <li>「No expiration」を選択するか、期限を設定</li>
+                                        <li>下にスクロールして「Generate token」ボタンをクリック</li>
+                                        <li>表示されたトークンをコピーしてメモ帳等に保存（重要: この画面を閉じると二度と表示されません）</li>
+                                    </ol>
+                                    <div class="alert alert-danger">
+                                        <i class="bi bi-exclamation-circle me-2"></i>
+                                        <strong>とても重要:</strong> 生成されたトークンは必ずメモしてください。このトークンは一度しか表示されず、忘れるとアプリが使えなくなります。
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-4-circle me-2"></i>アプリの設定</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>このアプリの右上の歯車アイコン（設定）をクリック</li>
+                                        <li>「GitHub設定」タブを選択</li>
+                                        <li>以下の情報を入力:
+                                            <ul>
+                                                <li>「アクセストークン」: ステップ3でコピーしたトークン</li>
+                                                <li>「ユーザー名」: あなたのGitHubユーザー名</li>
+                                                <li>「リポジトリ名」: 「lathe-time-data」（ステップ2で作成したリポジトリ名）</li>
+                                                <li>「データファイルパス」: 「lathe-time-data.json」（変更不要）</li>
+                                            </ul>
+                                        </li>
+                                        <li>「設定を保存」ボタンをクリック</li>
+                                        <li>「接続テスト」ボタンをクリックして設定が正しいか確認</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <strong>完了!</strong> これで設定は完了です。アプリのデータ同期ボタンを使って、作業データをGitHubに保存できるようになりました。
+                            </div>
+                        </div>
+
+                        <!-- 図面番号スキャンタブ -->
+                        <div class="tab-pane fade" id="vision-api" role="tabpanel" aria-labelledby="vision-api-tab">
+                            <h4 class="mb-3"><i class="bi bi-camera me-2"></i>図面番号スキャン機能の設定と使い方</h4>
+                            <p>この機能を使うと、図面番号を手入力せずに画像から自動認識できます。</p>
+
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-lightbulb me-2"></i>
+                                <strong>この機能は任意です:</strong> Google Cloud Vision APIのキーが必要ですが、使わなくてもアプリの基本機能は使えます。
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-1-circle me-2"></i>Google Cloudアカウントの設定</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li><a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> にアクセス（Googleアカウントでログイン）</li>
+                                        <li>クレジットカードの登録が必要ですが、月1,000リクエストまで無料で使えます</li>
+                                        <li>新しいプロジェクトを作成（右上のプロジェクト選択→「新しいプロジェクト」）</li>
+                                        <li>プロジェクト名を入力（例: 「Lathe Time Tracker」）→「作成」</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-2-circle me-2"></i>Vision APIの有効化</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>左側のメニューから「APIとサービス」→「ライブラリ」を選択</li>
+                                        <li>検索欄に「Vision」と入力</li>
+                                        <li>「Cloud Vision API」をクリック</li>
+                                        <li>「有効にする」ボタンをクリック</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-3-circle me-2"></i>APIキーの作成</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>左側のメニューから「APIとサービス」→「認証情報」を選択</li>
+                                        <li>上部の「認証情報を作成」ボタンをクリック→「APIキー」を選択</li>
+                                        <li>表示されたAPIキーをコピーしてメモ帳等に保存</li>
+                                        <li>（任意）「APIキーを制限」をクリックし、「APIの制限」で「Cloud Vision API」のみを選択すると安全性が向上します</li>
+                                    </ol>
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <strong>メモ:</strong> このAPIキーは図面番号スキャン機能で使用します。安全な場所に保管してください。
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-4-circle me-2"></i>図面番号スキャン機能の使い方</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>アプリの右上のカメラアイコンをクリック（スマホでは下部メニューの「図面」）</li>
+                                        <li>初回使用時に、APIキーの入力欄にコピーしたAPIキーを貼り付け</li>
+                                        <li>「図面番号が写っている画像をアップロード」から画像を選択</li>
+                                        <li>テキスト認識後、検出された各テキスト行から図面番号の構成要素をクリックして選択</li>
+                                        <li>「この番号を適用してメイン画面に戻る」ボタンをクリックすると、自動的にメイン画面の図面番号欄に反映されます</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <strong>ヒント:</strong> APIキーは一度設定すると、同じブラウザでは再入力不要です。図は明るく、テキストがはっきり見えるように撮影すると認識精度が向上します。
+                            </div>
+                        </div>
+
+                        <!-- スマホでの使用方法タブ -->
+                        <div class="tab-pane fade" id="mobile-usage" role="tabpanel" aria-labelledby="mobile-tab">
+                            <h4 class="mb-3"><i class="bi bi-phone me-2"></i>スマホでの使用方法</h4>
+                            <p>このアプリはスマートフォンでの使用に最適化されています。ホーム画面に追加すると、通常のアプリのように使用できます。</p>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-apple me-2"></i>iPhoneでのホーム画面追加手順</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>Safari（ブラウザ）でこのページを開く</li>
+                                        <li>画面下部の「共有」アイコン（四角から矢印が出ているアイコン）をタップ</li>
+                                        <li>「ホーム画面に追加」をタップ</li>
+                                        <li>名前を確認し、「追加」をタップ</li>
+                                    </ol>
+                                    <p>これでホーム画面にアイコンが追加され、通常のアプリのように起動できます。</p>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="bi bi-android2 me-2"></i>Androidでのホーム画面追加手順</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol>
+                                        <li>Chrome（ブラウザ）でこのページを開く</li>
+                                        <li>右上のメニュー（縦に3つの点）をタップ</li>
+                                        <li>「ホーム画面に追加」をタップ</li>
+                                        <li>名前を確認し、「追加」をタップ</li>
+                                    </ol>
+                                    <p>これでホーム画面にアイコンが追加され、通常のアプリのように起動できます。</p>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="bi bi-lightbulb me-2"></i>
+                                <strong>ヒント:</strong> スマホでの操作はほぼ同じですが、画面下部のボタンを使うと便利です。データ同期は定期的に行うことをお勧めします。
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
