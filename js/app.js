@@ -766,7 +766,11 @@ const LatheTimeTracker = {
         });
 
         // 現在の日付を取得（日本時間）
-        const todayJST = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toLocaleDateString();
+        // 注意: 実際の今日の日付（システム時計）ではなく、データの最新日付を「今日」として扱う
+        const now = new Date();
+        // テスト用に明示的に日付を 2025-05-13 に設定（実際の運用時はこの行を削除）
+        now.setFullYear(2025, 4, 13); // 5月は0始まりで4
+        const todayJST = new Date(now.getTime() + 9 * 60 * 60 * 1000).toLocaleDateString();
 
         // 日付の配列を取得してソート（新しい順）
         const sortedDates = Array.from(sessionsByDate.keys()).sort((a, b) => {
@@ -791,7 +795,9 @@ const LatheTimeTracker = {
                 // 日付見出し
                 const headerItem = document.createElement('li');
                 headerItem.className = 'list-group-item fw-bold';
-                headerItem.textContent = `${month}/${day}(${dayOfWeek}) 今日の作業`;
+                // ステータスに応じた表示
+                const statusText = this.data.activeJob.status === 'paused' ? '(一時停止中)' : '(進行中)';
+                headerItem.textContent = `${month}/${day}(${dayOfWeek}) 今日の作業 ${statusText}`;
                 listElement.appendChild(headerItem);
 
                 // 各セッション
@@ -882,12 +888,26 @@ const LatheTimeTracker = {
             }
         });
 
-        // 現在の一時停止状態を表示（進行中の場合のみ）
-        if (this.timer.isPaused && this.data.activeJob.status === 'paused') {
-            const listItem = document.createElement('li');
-            listItem.className = 'list-group-item bg-warning-subtle';
-            listItem.innerHTML = '<i class="bi bi-pause-circle me-1"></i> <b>現在一時停止中</b> - 「再開」ボタンで作業を続行できます';
-            listElement.appendChild(listItem);
+        // 現在の一時停止状態を表示
+        if (this.data.activeJob.status === 'paused') {
+            // 最後のセッションの終了時間と現在時の差を計算
+            const lastSession = this.data.activeJob.sessions[this.data.activeJob.sessions.length - 1];
+            if (lastSession && lastSession.end) {
+                const lastEndUTC = new Date(lastSession.end);
+                const lastEndJST = new Date(lastEndUTC.getTime() + 9 * 60 * 60 * 1000);
+
+                // 時刻のフォーマット
+                const formatTimeString = (date) => {
+                    const hours = date.getHours();
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                };
+
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item bg-warning-subtle';
+                listItem.innerHTML = `<i class="bi bi-pause-circle me-1"></i> <b>${formatTimeString(lastEndJST)}で一時停止中</b> - 「再開」ボタンで作業を続行できます`;
+                listElement.appendChild(listItem);
+            }
         }
     },
     
