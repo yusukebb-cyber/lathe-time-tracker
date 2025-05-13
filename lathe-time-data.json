@@ -1,60 +1,52 @@
 {
-  "activeJob": null,
-  "completedJobs": [
-    {
-      "drawingNumber": "VZモーター本体140kW",
-      "description": "オレンジ色長谷川鉄工",
-      "itemQuantity": 5,
-      "startedAt": "2025-05-12T08:00:00.000Z",
-      "lastUpdated": "2025-05-12T17:00:00.000Z",
-      "sessions": [
-        {
-          "start": "2025-05-12T08:00:00.000Z",
-          "end": "2025-05-12T12:00:00.000Z"
-        },
-        {
-          "start": "2025-05-12T13:00:00.000Z",
-          "end": "2025-05-12T17:00:00.000Z"
-        }
-      ],
-      "breaks": [
-        {
-          "start": "2025-05-12T12:00:00.000Z",
-          "end": "2025-05-12T13:00:00.000Z",
-          "duration": 60
-        }
-      ],
-      "totalTimeMinutes": 480,
-      "status": "completed",
-      "completedAt": "2025-05-12T17:00:00.000Z"
-    },
-    {
-      "drawingNumber": "VZモーター本体140kW",
-      "description": "オレンジ色長谷川鉄工",
-      "itemQuantity": 5,
-      "startedAt": "2025-05-13T08:00:00.000Z",
-      "lastUpdated": "2025-05-13T17:00:00.000Z",
-      "sessions": [
-        {
-          "start": "2025-05-13T08:00:00.000Z",
-          "end": "2025-05-13T12:00:00.000Z"
-        },
-        {
-          "start": "2025-05-13T13:00:00.000Z",
-          "end": "2025-05-13T17:00:00.000Z"
-        }
-      ],
-      "breaks": [
-        {
-          "start": "2025-05-13T12:00:00.000Z",
-          "end": "2025-05-13T13:00:00.000Z",
-          "duration": 60
-        }
-      ],
-      "totalTimeMinutes": 480,
-      "status": "completed",
-      "completedAt": "2025-05-13T17:00:00.000Z"
-    }
-  ],
+  "activeJob": {
+    "drawingNumber": "VZモーター本体140kW",
+    "description": "オレンジ色長谷川鉄工",
+    "itemQuantity": 5,
+    "startedAt": "2025-05-12T08:00:00.000Z",
+    "lastUpdated": "2025-05-13T17:00:00.000Z",
+    "sessions": [
+      {
+        "start": "2025-05-12T08:00:00.000Z",
+        "end": "2025-05-12T12:00:00.000Z"
+      },
+      {
+        "start": "2025-05-12T13:00:00.000Z",
+        "end": "2025-05-12T17:00:00.000Z"
+      },
+      {
+        "start": "2025-05-13T08:00:00.000Z",
+        "end": "2025-05-13T12:00:00.000Z"
+      },
+      {
+        "start": "2025-05-13T13:00:00.000Z",
+        "end": "2025-05-13T17:00:00.000Z"
+      },
+      {
+        "start": "2025-05-14T08:00:00.000Z",
+        "end": null
+      }
+    ],
+    "breaks": [
+      {
+        "start": "2025-05-12T12:00:00.000Z",
+        "end": "2025-05-12T13:00:00.000Z",
+        "duration": 60
+      },
+      {
+        "start": "2025-05-12T17:00:00.000Z",
+        "end": "2025-05-13T08:00:00.000Z",
+        "duration": 900
+      },
+      {
+        "start": "2025-05-13T12:00:00.000Z",
+        "end": "2025-05-13T13:00:00.000Z",
+        "duration": 60
+      }
+    ],
+    "totalTimeMinutes": 960,
+    "status": "active"
+  },
+  "completedJobs": [],
   "lastSync": "2025-05-13T17:05:00.000Z"
 }
