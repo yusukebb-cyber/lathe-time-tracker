@@ -742,47 +742,89 @@ const LatheTimeTracker = {
         if (!this.data.activeJob) {
             return;
         }
-        
+
         const listElement = this.elements.workSessionsList;
         listElement.innerHTML = '';
-        
-        // Add sessions
-        this.data.activeJob.sessions.forEach((session, index) => {
+
+        // セッションをグループ化するための Map (日付 -> セッション配列)
+        const sessionsByDate = new Map();
+
+        // 各セッションを日付ごとにグループ化
+        this.data.activeJob.sessions.forEach(session => {
             if (!session.start) return;
-            
+
             const startTime = new Date(session.start);
-            const endTime = session.end ? new Date(session.end) : (this.timer.isPaused ? null : new Date());
-            
-            const listItem = document.createElement('li');
-            listItem.className = 'list-group-item';
-            
-            // Format display text
-            let sessionText = `Session ${index + 1}: ${this.formatTime12Hour(startTime)}`;
-            if (endTime) {
-                const duration = this.calculateSessionMinutes(startTime, endTime);
-                sessionText += ` - ${this.formatTime12Hour(endTime)} (${duration} min)`;
-            } else {
-                sessionText += ' - ongoing';
+            const dateKey = startTime.toLocaleDateString(); // 日付のみの文字列
+
+            if (!sessionsByDate.has(dateKey)) {
+                sessionsByDate.set(dateKey, []);
             }
-            
-            listItem.textContent = sessionText;
-            listElement.appendChild(listItem);
+
+            sessionsByDate.get(dateKey).push(session);
         });
-        
-        // Add breaks
-        this.data.activeJob.breaks.forEach((breakItem, index) => {
-            const startTime = new Date(breakItem.start);
-            const endTime = new Date(breakItem.end);
-            
+
+        // 現在の日付を取得（今日のセッションを特別扱いするため）
+        const today = new Date().toLocaleDateString();
+
+        // 日付ごとのセッションを表示
+        sessionsByDate.forEach((sessions, dateKey) => {
+            const isToday = dateKey === today;
+
+            if (isToday) {
+                // 今日のセッションは詳細表示
+                sessions.forEach((session, index) => {
+                    const startTime = new Date(session.start);
+                    const endTime = session.end ? new Date(session.end) : (this.timer.isPaused ? null : new Date());
+
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+
+                    // Format display text
+                    let sessionText = `今日 ${this.formatTime12Hour(startTime)}`;
+                    if (endTime) {
+                        const duration = this.calculateSessionMinutes(startTime, endTime);
+                        sessionText += ` - ${this.formatTime12Hour(endTime)} (${duration}分)`;
+                    } else {
+                        sessionText += ' - 作業中';
+                    }
+
+                    listItem.textContent = sessionText;
+                    listElement.appendChild(listItem);
+                });
+            } else {
+                // 過去の日付は1日単位でまとめて表示
+                const firstSession = sessions[0];
+                const lastSession = sessions[sessions.length - 1];
+
+                const date = new Date(firstSession.start);
+                const month = date.getMonth() + 1; // 月は0始まりなので+1
+                const day = date.getDate();
+                const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
+
+                // その日の全セッションから総作業時間を計算
+                let totalDuration = 0;
+                sessions.forEach(session => {
+                    if (!session.start || !session.end) return;
+
+                    const startTime = new Date(session.start);
+                    const endTime = new Date(session.end);
+                    totalDuration += this.calculateSessionMinutes(startTime, endTime);
+                });
+
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.textContent = `${month}/${day}(${dayOfWeek}) の作業: ${this.formatTime(totalDuration)}`;
+                listElement.appendChild(listItem);
+            }
+        });
+
+        // 現在の一時停止状態を表示（進行中の場合のみ）
+        if (this.timer.isPaused && this.data.activeJob.status === 'paused') {
             const listItem = document.createElement('li');
             listItem.className = 'list-group-item bg-light';
-            
-            // Format display text
-            const breakText = `Break: ${this.formatTime12Hour(startTime)} - ${this.formatTime12Hour(endTime)} (${breakItem.duration} min)`;
-            
-            listItem.textContent = breakText;
+            listItem.textContent = '現在一時停止中 - 「再開」ボタンで作業を続行できます';
             listElement.appendChild(listItem);
-        });
+        }
     },
     
     /**
@@ -870,8 +912,8 @@ const LatheTimeTracker = {
         // セッションのリスト作成
         let sessionsHtml = '';
         job.sessions.forEach((session, i) => {
-            const start = new Date(session.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-            const end = session.end ? new Date(session.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '終了なし';
+            const start = new Date(session.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
+            const end = session.end ? new Date(session.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'}) : '終了なし';
             sessionsHtml += `<li class="mb-2">セッション ${i+1}: ${start} - ${end}</li>`;
         });
 
@@ -879,8 +921,8 @@ const LatheTimeTracker = {
         let breaksHtml = '';
         if (job.breaks && job.breaks.length > 0) {
             job.breaks.forEach((breakItem, i) => {
-                const start = new Date(breakItem.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-                const end = new Date(breakItem.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+                const start = new Date(breakItem.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
+                const end = new Date(breakItem.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
                 const duration = breakItem.duration || Math.round((new Date(breakItem.end) - new Date(breakItem.start)) / 60000);
                 breaksHtml += `<li class="mb-2">休憩 ${i+1}: ${start} - ${end} (${duration}分)</li>`;
             });
@@ -1241,7 +1283,12 @@ const LatheTimeTracker = {
      * @returns {string} Formatted time (e.g., "2:30 PM")
      */
     formatTime12Hour(date) {
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // UTCタイムゾーンを明示的に指定して時間を表示
+        return date.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'UTC'  // UTCタイムゾーンを使用
+        });
     },
     
     /**
