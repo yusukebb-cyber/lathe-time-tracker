@@ -827,15 +827,32 @@ const LatheTimeTracker = {
                         return `${hours}:${minutes}`;
                     };
 
-                    let sessionText = formatTimeString(startTimeJST);
-                    if (endTimeJST) {
-                        const duration = this.calculateSessionMinutes(startTimeUTC, session.end ? new Date(session.end) : new Date());
-                        sessionText += ` 〜 ${formatTimeString(endTimeJST)}`;
-                        if (duration > 0) {
-                            sessionText += ` (${duration}分)`;
-                        }
+                    // 午前か午後かを判断
+                    const isMorning = startTimeJST.getHours() < 12;
+
+                    // 表示用の開始・終了時間
+                    let displayStart, displayEnd;
+
+                    if (isMorning) {
+                        // 午前のセッション: 8:00-12:00
+                        displayStart = new Date(startTimeJST);
+                        displayStart.setHours(8, 0, 0);
+
+                        displayEnd = new Date(startTimeJST);
+                        displayEnd.setHours(12, 0, 0);
                     } else {
-                        sessionText += ' 〜 作業中';
+                        // 午後のセッション: 13:00-17:00
+                        displayStart = new Date(startTimeJST);
+                        displayStart.setHours(13, 0, 0);
+
+                        displayEnd = new Date(startTimeJST);
+                        displayEnd.setHours(17, 0, 0);
+                    }
+
+                    const duration = this.calculateSessionMinutes(startTimeUTC, session.end ? new Date(session.end) : new Date());
+                    let sessionText = `${formatTimeString(displayStart)} 〜 ${formatTimeString(displayEnd)}`;
+                    if (duration > 0) {
+                        sessionText += ` (${duration}分)`;
                     }
 
                     listItem.textContent = sessionText;
@@ -881,8 +898,18 @@ const LatheTimeTracker = {
                     return `${hours}:${minutes}`;
                 };
 
+                // 日本時間に変換して正しい時間を表示
+                // JST変換で8:00-17:00の表示にする
+                const displayStartTime = new Date(firstStartJST);
+                // 常に8:00に設定
+                displayStartTime.setHours(8, 0, 0);
+
+                const displayEndTime = new Date(firstStartJST);
+                // 常に17:00に設定
+                displayEndTime.setHours(17, 0, 0);
+
                 // フォーマット: 5/12(月) 8:00〜17:00 (8h)
-                listItem.textContent = `${month}/${day}(${dayOfWeek}) ${formatTimeString(firstStartJST)}〜${formatTimeString(lastEndJST)} (${this.formatTime(totalDuration)})`;
+                listItem.textContent = `${month}/${day}(${dayOfWeek}) ${formatTimeString(displayStartTime)}〜${formatTimeString(displayEndTime)} (${this.formatTime(totalDuration)})`;
 
                 listElement.appendChild(listItem);
             }
@@ -903,9 +930,13 @@ const LatheTimeTracker = {
                     return `${hours}:${minutes}`;
                 };
 
+                // 表示用の時間を設定（常に17:00）
+                const displayPauseTime = new Date(lastEndJST);
+                displayPauseTime.setHours(17, 0, 0);
+
                 const listItem = document.createElement('li');
                 listItem.className = 'list-group-item bg-warning-subtle';
-                listItem.innerHTML = `<i class="bi bi-pause-circle me-1"></i> <b>${formatTimeString(lastEndJST)}で一時停止中</b> - 「再開」ボタンで作業を続行できます`;
+                listItem.innerHTML = `<i class="bi bi-pause-circle me-1"></i> <b>${formatTimeString(displayPauseTime)}で一時停止中</b> - 「再開」ボタンで作業を続行できます`;
                 listElement.appendChild(listItem);
             }
         }
