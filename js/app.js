@@ -430,18 +430,27 @@ const LatheTimeTracker = {
 
         if (this.timer.isPaused) {
             // Resume
-            const pauseDuration = (new Date() - new Date(this.timer.pauseStartTime));
+            if (!this.timer.pauseStartTime) {
+                console.error('Pause start time is not defined. Using current time instead.');
+                this.timer.pauseStartTime = new Date();
+            }
+
+            const now = new Date();
+            const pauseDuration = (now - this.timer.pauseStartTime);
+
+            // Ensure the pause duration is valid (not negative)
+            const validPauseDuration = Math.max(0, pauseDuration);
 
             // Add break record
             this.data.activeJob.breaks.push({
                 start: this.timer.pauseStartTime.toISOString(),
-                end: new Date().toISOString(),
-                duration: Math.floor(pauseDuration / 60000) // convert to minutes
+                end: now.toISOString(),
+                duration: Math.floor(validPauseDuration / 60000) // convert to minutes
             });
 
             // Add new session
             this.data.activeJob.sessions.push({
-                start: new Date().toISOString(),
+                start: now.toISOString(),
                 end: null
             });
 
@@ -1024,18 +1033,28 @@ const LatheTimeTracker = {
                 this.elements.activeJobQuantity.textContent = this.data.activeJob.itemQuantity || 1;
             }
 
+            // Set timer state from job status
+            this.timer.isPaused = this.data.activeJob.status === 'paused';
+
             // Update pause/resume button
             if (this.timer.isPaused) {
                 this.elements.pauseResumeBtn.textContent = 'Resume';
-                this.elements.pauseResumeBtn.classList.replace('btn-warning', 'btn-success');
+                this.elements.pauseResumeBtn.classList.remove('btn-warning');
+                this.elements.pauseResumeBtn.classList.add('btn-success');
 
                 // タイマーラベルを「一時停止中」に設定
                 if (this.elements.timerLabel) {
                     this.elements.timerLabel.textContent = '一時停止中';
                 }
+
+                // Ensure pause start time is set when UI is updated
+                if (!this.timer.pauseStartTime && this.data.activeJob.lastUpdated) {
+                    this.timer.pauseStartTime = new Date(this.data.activeJob.lastUpdated);
+                }
             } else {
                 this.elements.pauseResumeBtn.textContent = 'Pause';
-                this.elements.pauseResumeBtn.classList.replace('btn-success', 'btn-warning');
+                this.elements.pauseResumeBtn.classList.remove('btn-success');
+                this.elements.pauseResumeBtn.classList.add('btn-warning');
 
                 // タイマーラベルを「現在のセッション時間」に設定
                 if (this.elements.timerLabel) {
@@ -1103,20 +1122,25 @@ const LatheTimeTracker = {
     loadData() {
         try {
             const savedData = localStorage.getItem('latheTimeTrackerData');
-            
+
             if (savedData) {
                 this.data = JSON.parse(savedData);
-                
+
                 // Initialize timer state if there's an active job
                 if (this.data.activeJob) {
                     this.timer.isPaused = this.data.activeJob.status === 'paused';
-                    
+
+                    // If the job is paused, set the pause start time to the last update time
+                    if (this.timer.isPaused && this.data.activeJob.lastUpdated) {
+                        this.timer.pauseStartTime = new Date(this.data.activeJob.lastUpdated);
+                    }
+
                     // Resume timer if job is active
                     if (!this.timer.isPaused) {
                         this.startTimer();
                     }
                 }
-                
+
                 console.log('Data loaded from localStorage');
             }
         } catch (error) {
