@@ -935,7 +935,8 @@ const LatheTimeTracker = {
                 displayPauseTime.setHours(17, 0, 0);
 
                 const listItem = document.createElement('li');
-                listItem.className = 'list-group-item bg-warning-subtle';
+                // CSSクラスを使用して統一したスタイルにする
+                listItem.className = 'list-group-item pause-banner';
                 listItem.innerHTML = `<i class="bi bi-pause-circle me-1"></i> <b>${formatTimeString(displayPauseTime)}で一時停止中</b> - 「再開」ボタンで作業を続行できます`;
                 listElement.appendChild(listItem);
             }

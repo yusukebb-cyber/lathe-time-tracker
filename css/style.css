@@ -560,6 +560,24 @@ body {
     color: #E0E0E0;
 }
 
+/* 一時停止バナー（ダークモード対応） */
+.pause-banner {
+    background-color: #FF9900;  /* オレンジ色 */
+    color: #000000;            /* 黒文字 */
+    font-weight: 500;          /* やや太字 */
+    border-radius: 4px;        /* 角を丸く */
+    margin: 10px 0;
+    padding: 10px 15px;
+    border-left: 5px solid #FF6600;  /* 左側のボーダーを濃いオレンジ色に */
+}
+
+.dark-mode .pause-banner {
+    background-color: #FF9900; /* オレンジ色 */
+    color: #000000;           /* 黒文字 */
+    border-left: 5px solid #FF6600;
+    box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
+}
+
 .dark-mode hr {
     border-color: #444;
 }
