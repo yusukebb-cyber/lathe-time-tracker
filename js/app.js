@@ -790,7 +790,7 @@ const LatheTimeTracker = {
                 // 今日のセッションは詳細表示
                 // 日付見出し
                 const headerItem = document.createElement('li');
-                headerItem.className = 'list-group-item list-group-item-primary';
+                headerItem.className = 'list-group-item fw-bold';
                 headerItem.textContent = `${month}/${day}(${dayOfWeek}) 今日の作業`;
                 listElement.appendChild(headerItem);
 
@@ -814,10 +814,17 @@ const LatheTimeTracker = {
                     listItem.className = 'list-group-item';
 
                     // Format display text
-                    let sessionText = `${startTimeJST.getHours()}:${String(startTimeJST.getMinutes()).padStart(2, '0')}`;
+                    // 時刻のフォーマットを関数化
+                    const formatTimeString = (date) => {
+                        const hours = date.getHours();
+                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                        return `${hours}:${minutes}`;
+                    };
+
+                    let sessionText = formatTimeString(startTimeJST);
                     if (endTimeJST) {
                         const duration = this.calculateSessionMinutes(startTimeUTC, session.end ? new Date(session.end) : new Date());
-                        sessionText += ` 〜 ${endTimeJST.getHours()}:${String(endTimeJST.getMinutes()).padStart(2, '0')}`;
+                        sessionText += ` 〜 ${formatTimeString(endTimeJST)}`;
                         if (duration > 0) {
                             sessionText += ` (${duration}分)`;
                         }
@@ -861,8 +868,15 @@ const LatheTimeTracker = {
                 const listItem = document.createElement('li');
                 listItem.className = 'list-group-item';
 
+                // 時刻のフォーマットを関数化
+                const formatTimeString = (date) => {
+                    const hours = date.getHours();
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                };
+
                 // フォーマット: 5/12(月) 8:00〜17:00 (8h)
-                listItem.textContent = `${month}/${day}(${dayOfWeek}) ${firstStartJST.getHours()}:${String(firstStartJST.getMinutes()).padStart(2, '0')}〜${lastEndJST.getHours()}:${String(lastEndJST.getMinutes()).padStart(2, '0')} (${this.formatTime(totalDuration)})`;
+                listItem.textContent = `${month}/${day}(${dayOfWeek}) ${formatTimeString(firstStartJST)}〜${formatTimeString(lastEndJST)} (${this.formatTime(totalDuration)})`;
 
                 listElement.appendChild(listItem);
             }
@@ -871,8 +885,8 @@ const LatheTimeTracker = {
         // 現在の一時停止状態を表示（進行中の場合のみ）
         if (this.timer.isPaused && this.data.activeJob.status === 'paused') {
             const listItem = document.createElement('li');
-            listItem.className = 'list-group-item list-group-item-warning';
-            listItem.textContent = '現在一時停止中 - 「再開」ボタンで作業を続行できます';
+            listItem.className = 'list-group-item bg-warning-subtle';
+            listItem.innerHTML = '<i class="bi bi-pause-circle me-1"></i> <b>現在一時停止中</b> - 「再開」ボタンで作業を続行できます';
             listElement.appendChild(listItem);
         }
     },
