@@ -4,7 +4,7 @@
     "description": "オレンジ色長谷川鉄工",
     "itemQuantity": 5,
     "startedAt": "2025-05-11T23:06:14.056Z",
-    "lastUpdated": "2025-05-12T08:02:54.152Z",
+    "lastUpdated": "2025-05-12T23:02:50.650Z",
     "sessions": [
       {
         "start": "2025-05-11T23:06:14.056Z",
@@ -16,5 +16,5 @@
     "status": "paused"
   },
   "completedJobs": [],
-  "lastSync": "2025-05-12T08:05:56.822Z"
+  "lastSync": "2025-05-12T23:06:08.512Z"
 }
