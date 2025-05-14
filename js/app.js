@@ -916,17 +916,25 @@ const LatheTimeTracker = {
                 const displayStartTime = new Date(firstStartJST);
                 const displayEndTime = new Date(lastEndJST);
                 
-                // 通常勤務時間より上下にはみ出している場合、表示用に調整する
-                if (displayStartTime.getHours() < 8) {
-                    displayStartTime.setHours(8, 0, 0);
+                // 日付またぎをチェック（終了時刻が開始時刻より早い場合は日付またぎと判断）
+                let dateStr = `${month}/${day}(${dayOfWeek})`;
+                let isCrossingDays = false;
+                
+                // 日付またぎチェック: 終了時間が開始時間より小さい場合または終了日と開始日が異なる場合
+                if (displayEndTime < displayStartTime || displayEndTime.getDate() !== displayStartTime.getDate()) {
+                    isCrossingDays = true;
+                    const endMonth = displayEndTime.getMonth() + 1;
+                    const endDay = displayEndTime.getDate();
+                    const endDayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][displayEndTime.getDay()];
+                    dateStr = `${month}/${day}(${dayOfWeek})-${endMonth}/${endDay}(${endDayOfWeek})`;
                 }
                 
-                if (displayEndTime.getHours() >= 17) {
-                    displayEndTime.setHours(17, 0, 0);
-                }
-
-                // フォーマット: 5/12(月) 8:00〜17:00 (8h)
-                listItem.textContent = `${month}/${day}(${dayOfWeek}) ${formatTimeString(displayStartTime)}〜${formatTimeString(displayEndTime)} (${this.formatTime(totalDuration)})`;
+                // 通常勤務時間に収まらない場合の調整
+                let startDisplayStr = formatTimeString(displayStartTime);
+                let endDisplayStr = formatTimeString(displayEndTime);
+                
+                // フォーマット: 5/12(月) 8:00〜17:00 (8h) または 5/12(月)-5/13(火) 22:00〜2:59 (4h 1m)
+                listItem.textContent = `${dateStr} ${startDisplayStr}〜${endDisplayStr} (${this.formatTime(totalDuration)})`;
 
                 listElement.appendChild(listItem);
             }
