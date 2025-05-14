@@ -704,6 +704,15 @@ const LatheTimeTracker = {
             const sessionStart = new Date(session.start);
             const sessionEnd = new Date(session.end);
             
+            // データの整合性チェック - 終了時間が開始時間より前のセッションをスキップ
+            if (sessionEnd < sessionStart) {
+                console.warn('整合性エラー: セッションの終了時間が開始時間より前です', {
+                    start: session.start,
+                    end: session.end
+                });
+                continue; // 無効なセッションはスキップ
+            }
+            
             totalMinutes += this.calculateSessionMinutes(sessionStart, sessionEnd);
         }
         
@@ -916,24 +925,38 @@ const LatheTimeTracker = {
                 const displayStartTime = new Date(firstStartJST);
                 const displayEndTime = new Date(lastEndJST);
                 
-                // 日付またぎをチェック（終了時刻が開始時刻より早い場合は日付またぎと判断）
-                let dateStr = `${month}/${day}(${dayOfWeek})`;
-                let isCrossingDays = false;
+                // その日の実際の作業時間を表示
+                const dateStr = `${month}/${day}(${dayOfWeek})`;
                 
-                // 日付またぎチェック: 終了時間が開始時間より小さい場合または終了日と開始日が異なる場合
-                if (displayEndTime < displayStartTime || displayEndTime.getDate() !== displayStartTime.getDate()) {
-                    isCrossingDays = true;
-                    const endMonth = displayEndTime.getMonth() + 1;
-                    const endDay = displayEndTime.getDate();
-                    const endDayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][displayEndTime.getDay()];
-                    dateStr = `${month}/${day}(${dayOfWeek})-${endMonth}/${endDay}(${endDayOfWeek})`;
+                // 実際の開始時刻と終了時刻を使用
+                let displayStartTime = new Date(firstStartJST);
+                let displayEndTime = new Date(lastEndJST);
+                
+                // データの整合性チェック - 終了時刻が開始時刻より前なら修正
+                if (displayEndTime < displayStartTime) {
+                    console.warn('整合性エラー: 終了時間が開始時間より前です', {
+                        start: displayStartTime.toISOString(),
+                        end: displayEndTime.toISOString()
+                    });
+                    // 開始時刻より30分後を終了時刻として設定
+                    displayEndTime = new Date(displayStartTime.getTime() + 30 * 60 * 1000);
                 }
                 
-                // 通常勤務時間に収まらない場合の調整
-                let startDisplayStr = formatTimeString(displayStartTime);
-                let endDisplayStr = formatTimeString(displayEndTime);
+                // 勤務時間外を調整
+                if (displayStartTime.getHours() < 8) {
+                    displayStartTime.setHours(8, 0, 0);
+                }
                 
-                // フォーマット: 5/12(月) 8:00〜17:00 (8h) または 5/12(月)-5/13(火) 22:00〜2:59 (4h 1m)
+                if (displayEndTime.getHours() >= 17 || 
+                    (displayEndTime.getHours() === 16 && displayEndTime.getMinutes() > 30)) {
+                    displayEndTime.setHours(17, 0, 0);
+                }
+                
+                // 時間をフォーマット
+                const startDisplayStr = formatTimeString(displayStartTime);
+                const endDisplayStr = formatTimeString(displayEndTime);
+                
+                // フォーマット: 5/14(水) 9:30〜15:45 (4h 1m)
                 listItem.textContent = `${dateStr} ${startDisplayStr}〜${endDisplayStr} (${this.formatTime(totalDuration)})`;
 
                 listElement.appendChild(listItem);
