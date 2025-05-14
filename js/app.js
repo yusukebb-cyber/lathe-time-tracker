@@ -44,8 +44,15 @@ const LatheTimeTracker = {
      * @returns {Date} 日本時間の Date オブジェクト
      */
     convertToJST(dateInput) {
-        const utcDate = dateInput instanceof Date ? dateInput : new Date(dateInput);
-        return new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+        // ISO文字列の場合は素直にDateオブジェクトに変換
+        // 'Z'が付いていればUTC、そうでなければローカル時間として解釈される
+        const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        
+        // 単純に9時間を加算すれば日本時間
+        const jstDate = new Date(date.getTime());
+        jstDate.setHours(date.getHours() + 9);
+        
+        return jstDate;
     },
     
     /**
@@ -54,8 +61,13 @@ const LatheTimeTracker = {
      * @returns {Date} UTC の Date オブジェクト
      */
     convertToUTC(dateInput) {
-        const jstDate = dateInput instanceof Date ? dateInput : new Date(dateInput);
-        return new Date(jstDate.getTime() - 9 * 60 * 60 * 1000);
+        const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        
+        // 9時間を引けばUTC時間
+        const utcDate = new Date(date.getTime());
+        utcDate.setHours(date.getHours() - 9);
+        
+        return utcDate;
     },
     
     /**
