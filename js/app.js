@@ -594,7 +594,7 @@ const LatheTimeTracker = {
         }
 
         // 現在時刻をチェック - 17時以降なら自動的に一時停止（タイマー動作中のみ）
-        // 日本時間で判断するため、タイムゾーンを考慮
+        // 日本時間で判断
         const jstNow = this.convertToJST(new Date());
         if (jstNow.getHours() >= 17 && !this.timer.isPaused) {
             console.log('17時を過ぎたため、作業を自動的に一時停止します');
@@ -852,29 +852,23 @@ const LatheTimeTracker = {
                         return `${hours}:${minutes}`;
                     };
 
-                    // 午前か午後かを判断
-                    const isMorning = startTimeJST.getHours() < 12;
-
-                    // 表示用の開始・終了時間
-                    let displayStart, displayEnd;
-
-                    if (isMorning) {
-                        // 午前のセッション: 8:00-12:00
-                        displayStart = new Date(startTimeJST);
-                        displayStart.setHours(8, 0, 0);
-
-                        displayEnd = new Date(startTimeJST);
-                        displayEnd.setHours(12, 0, 0);
+                    // 実際の開始・終了時間（日本時間）を表示
+                    let displayStart = startTimeJST;
+                    
+                    // 終了時間（進行中のセッションは現在時刻）
+                    let displayEnd;
+                    if (session.end) {
+                        displayEnd = this.convertToJST(new Date(session.end));
                     } else {
-                        // 午後のセッション: 13:00-17:00
-                        displayStart = new Date(startTimeJST);
-                        displayStart.setHours(13, 0, 0);
-
-                        displayEnd = new Date(startTimeJST);
-                        displayEnd.setHours(17, 0, 0);
+                        displayEnd = this.convertToJST(new Date());
                     }
 
-                    const duration = this.calculateSessionMinutes(startTimeUTC, session.end ? new Date(session.end) : new Date());
+                    // セッション時間を計算（分）
+                    const startTimeUTC = new Date(session.start);
+                    const endTimeUTC = session.end ? new Date(session.end) : new Date();
+                    const duration = this.calculateSessionMinutes(startTimeUTC, endTimeUTC);
+                    
+                    // 表示テキスト: 「9:30 〜 10:45 (75分)」形式
                     let sessionText = `${formatTimeString(displayStart)} 〜 ${formatTimeString(displayEnd)}`;
                     if (duration > 0) {
                         sessionText += ` (${duration}分)`;
@@ -926,17 +920,9 @@ const LatheTimeTracker = {
                 // その日の作業時間を表示 (実際の開始・終了時間)
                 const dateStr = `${month}/${day}(${dayOfWeek})`;
                 
-                // 開始時間は必ず8:00以降
-                const displayStartTime = new Date(firstStartJST);
-                if (displayStartTime.getHours() < 8) {
-                    displayStartTime.setHours(8, 0, 0);
-                }
-                
-                // 終了時間は必ず17:00以前
-                const displayEndTime = new Date(lastEndJST);
-                if (displayEndTime.getHours() >= 17) {
-                    displayEndTime.setHours(17, 0, 0);
-                }
+                // 実際の開始時間と終了時間を使用
+                const displayStartTime = firstStartJST;
+                const displayEndTime = lastEndJST;
                 
                 // 時間をフォーマット
                 const startDisplayStr = formatTimeString(displayStartTime);
@@ -964,9 +950,8 @@ const LatheTimeTracker = {
                     return `${hours}:${minutes}`;
                 };
 
-                // 表示用の時間を設定（常に17:00）
-                const displayPauseTime = new Date(lastEndJST);
-                displayPauseTime.setHours(17, 0, 0);
+                // 実際の一時停止時間を表示
+                const displayPauseTime = lastEndJST;
 
                 const listItem = document.createElement('li');
                 // CSSクラスを使用して統一したスタイルにする
@@ -1001,9 +986,9 @@ const LatheTimeTracker = {
         this.data.completedJobs.forEach((job, index) => {
             const row = document.createElement('tr');
 
-            // 日付フォーマット
-            const completedDate = new Date(job.completedAt);
-            const dateStr = completedDate.toLocaleDateString();
+            // 日付フォーマット（日本時間）
+            const completedDateJST = this.convertToJST(new Date(job.completedAt));
+            const dateStr = completedDateJST.toLocaleDateString();
             
             // 加工個数と1個あたりの時間を計算
             const quantity = job.itemQuantity || 1;
@@ -1055,26 +1040,43 @@ const LatheTimeTracker = {
         const detailsContent = document.getElementById('jobDetailsContent');
         const restartBtn = document.getElementById('restartJobFromModal');
 
-        // 開始日と完了日をフォーマット
-        const startDate = new Date(job.startedAt).toLocaleString();
-        const completedDate = new Date(job.completedAt).toLocaleString();
+        // 開始日と完了日を日本時間でフォーマット
+        const startDateJST = this.convertToJST(new Date(job.startedAt));
+        const completedDateJST = this.convertToJST(new Date(job.completedAt));
+        const startDate = startDateJST.toLocaleString();
+        const completedDate = completedDateJST.toLocaleString();
 
         // セッションのリスト作成
         let sessionsHtml = '';
         job.sessions.forEach((session, i) => {
-            const start = new Date(session.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
-            const end = session.end ? new Date(session.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'}) : '終了なし';
-            sessionsHtml += `<li class="mb-2">セッション ${i+1}: ${start} - ${end}</li>`;
+            // 日本時間に変換
+            const startJST = this.convertToJST(new Date(session.start));
+            const startTime = startJST.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+            
+            let endTime;
+            if (session.end) {
+                const endJST = this.convertToJST(new Date(session.end));
+                endTime = endJST.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+            } else {
+                endTime = '終了なし';
+            }
+            
+            sessionsHtml += `<li class="mb-2">セッション ${i+1}: ${startTime} - ${endTime}</li>`;
         });
 
         // 休憩のリスト作成
         let breaksHtml = '';
         if (job.breaks && job.breaks.length > 0) {
             job.breaks.forEach((breakItem, i) => {
-                const start = new Date(breakItem.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
-                const end = new Date(breakItem.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
+                // 日本時間に変換
+                const startJST = this.convertToJST(new Date(breakItem.start));
+                const endJST = this.convertToJST(new Date(breakItem.end));
+                
+                const startTime = startJST.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+                const endTime = endJST.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+                
                 const duration = breakItem.duration || Math.round((new Date(breakItem.end) - new Date(breakItem.start)) / 60000);
-                breaksHtml += `<li class="mb-2">休憩 ${i+1}: ${start} - ${end} (${duration}分)</li>`;
+                breaksHtml += `<li class="mb-2">休憩 ${i+1}: ${startTime} - ${endTime} (${duration}分)</li>`;
             });
         } else {
             breaksHtml = '<li>休憩記録なし</li>';
@@ -1218,7 +1220,9 @@ const LatheTimeTracker = {
             // Update active job information
             this.elements.activeJobDrawingNumber.textContent = this.data.activeJob.drawingNumber;
             this.elements.activeJobDescription.textContent = this.data.activeJob.description || 'No description';
-            this.elements.activeJobStartTime.textContent = new Date(this.data.activeJob.startedAt).toLocaleString();
+            // 日本時間で開始時間を表示
+            const startTimeJST = this.convertToJST(new Date(this.data.activeJob.startedAt));
+            this.elements.activeJobStartTime.textContent = startTimeJST.toLocaleString();
 
             // 加工個数を表示
             if (this.elements.activeJobQuantity) {
@@ -1284,8 +1288,9 @@ const LatheTimeTracker = {
         const lastSyncElement = this.elements.lastSyncTime;
         
         if (this.data.lastSync) {
-            const syncDate = new Date(this.data.lastSync);
-            lastSyncElement.textContent = `最終同期: ${syncDate.toLocaleString()}`;
+            // 日本時間で表示
+            const syncDateJST = this.convertToJST(new Date(this.data.lastSync));
+            lastSyncElement.textContent = `最終同期: ${syncDateJST.toLocaleString()}`;
         } else {
             lastSyncElement.textContent = '未同期';
         }
