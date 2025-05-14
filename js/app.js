@@ -39,6 +39,26 @@ const LatheTimeTracker = {
     },
     
     /**
+     * UTC日付を日本時間（JST）に変換するヘルパー関数
+     * @param {string|Date} dateInput - ISO文字列または Date オブジェクト
+     * @returns {Date} 日本時間の Date オブジェクト
+     */
+    convertToJST(dateInput) {
+        const utcDate = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        return new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+    },
+    
+    /**
+     * 日本時間（JST）をUTCに変換するヘルパー関数
+     * @param {string|Date} dateInput - ISO文字列または Date オブジェクト
+     * @returns {Date} UTC の Date オブジェクト
+     */
+    convertToUTC(dateInput) {
+        const jstDate = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        return new Date(jstDate.getTime() - 9 * 60 * 60 * 1000);
+    },
+    
+    /**
      * Initialize the application
      */
     init() {
@@ -574,8 +594,9 @@ const LatheTimeTracker = {
         }
 
         // 現在時刻をチェック - 17時以降なら自動的に一時停止（タイマー動作中のみ）
-        const now = new Date();
-        if (now.getHours() >= 17 && !this.timer.isPaused) {
+        // 日本時間で判断するため、タイムゾーンを考慮
+        const jstNow = this.convertToJST(new Date());
+        if (jstNow.getHours() >= 17 && !this.timer.isPaused) {
             console.log('17時を過ぎたため、作業を自動的に一時停止します');
             this.togglePause();
             this.showSuccessMessage('17時になったため作業を自動的に一時停止しました。翌日は「再開」ボタンで続行できます。');
@@ -704,15 +725,15 @@ const LatheTimeTracker = {
         let totalMinutes = 0;
         let currentTime = new Date(start);
         
-        // Process time in 15-minute increments
+        // Process time in 1-minute increments for more accuracy
         while (currentTime < end) {
             const hour = currentTime.getHours();
-            const next15Min = new Date(currentTime);
-            next15Min.setMinutes(currentTime.getMinutes() + 15);
+            const nextMinute = new Date(currentTime);
+            nextMinute.setMinutes(currentTime.getMinutes() + 1);
             
             // If next increment would go past end time, adjust
-            if (next15Min > end) {
-                next15Min.setTime(end.getTime());
+            if (nextMinute > end) {
+                nextMinute.setTime(end.getTime());
             }
             
             // Skip lunch break (12:00-13:00)
@@ -725,11 +746,11 @@ const LatheTimeTracker = {
             }
             // Count working hours
             else {
-                const incrementMinutes = (next15Min - currentTime) / 60000;
+                const incrementMinutes = (nextMinute - currentTime) / 60000;
                 totalMinutes += incrementMinutes;
             }
             
-            currentTime = next15Min;
+            currentTime = nextMinute;
         }
         
         return Math.round(totalMinutes);
@@ -753,9 +774,8 @@ const LatheTimeTracker = {
         this.data.activeJob.sessions.forEach(session => {
             if (!session.start) return;
 
-            // UTCの日付を日本時間に変換（+9時間）して日付を取得
-            const startTimeUTC = new Date(session.start);
-            const startTimeJST = new Date(startTimeUTC.getTime() + 9 * 60 * 60 * 1000);
+            // ヘルパー関数を使用してUTCを日本時間に変換
+            const startTimeJST = this.convertToJST(session.start);
             const dateKey = startTimeJST.toLocaleDateString(); // 日付のみの文字列
 
             if (!sessionsByDate.has(dateKey)) {
@@ -766,11 +786,9 @@ const LatheTimeTracker = {
         });
 
         // 現在の日付を取得（日本時間）
-        // 注意: 実際の今日の日付（システム時計）ではなく、データの最新日付を「今日」として扱う
         const now = new Date();
-        // テスト用に明示的に日付を 2025-05-13 に設定（実際の運用時はこの行を削除）
-        now.setFullYear(2025, 4, 13); // 5月は0始まりで4
-        const todayJST = new Date(now.getTime() + 9 * 60 * 60 * 1000).toLocaleDateString();
+        // 日本時間に変換（ヘルパー関数を使用）
+        const todayJST = this.convertToJST(now).toLocaleDateString();
 
         // 日付の配列を取得してソート（新しい順）
         const sortedDates = Array.from(sessionsByDate.keys()).sort((a, b) => {
@@ -802,18 +820,16 @@ const LatheTimeTracker = {
 
                 // 各セッション
                 sessions.forEach((session, index) => {
-                    const startTimeUTC = new Date(session.start);
-                    const startTimeJST = new Date(startTimeUTC.getTime() + 9 * 60 * 60 * 1000);
+                    const startTimeJST = this.convertToJST(session.start);
 
                     let endTimeJST = null;
                     if (session.end) {
-                        const endTimeUTC = new Date(session.end);
-                        endTimeJST = new Date(endTimeUTC.getTime() + 9 * 60 * 60 * 1000);
+                        endTimeJST = this.convertToJST(session.end);
                     } else if (this.timer.isPaused) {
                         endTimeJST = null;
                     } else {
                         // 進行中のセッション
-                        endTimeJST = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+                        endTimeJST = this.convertToJST(new Date());
                     }
 
                     const listItem = document.createElement('li');
@@ -865,13 +881,11 @@ const LatheTimeTracker = {
                 const lastSession = sessions[sessions.length - 1];
 
                 // 開始・終了時間（日本時間）
-                const firstStartUTC = new Date(firstSession.start);
-                const firstStartJST = new Date(firstStartUTC.getTime() + 9 * 60 * 60 * 1000);
+                const firstStartJST = this.convertToJST(firstSession.start);
 
                 let lastEndJST;
                 if (lastSession.end) {
-                    const lastEndUTC = new Date(lastSession.end);
-                    lastEndJST = new Date(lastEndUTC.getTime() + 9 * 60 * 60 * 1000);
+                    lastEndJST = this.convertToJST(lastSession.end);
                 } else {
                     // 最後のセッションが終了していない場合（通常ないはず）
                     lastEndJST = new Date(firstStartJST);
@@ -898,15 +912,18 @@ const LatheTimeTracker = {
                     return `${hours}:${minutes}`;
                 };
 
-                // 日本時間に変換して正しい時間を表示
-                // JST変換で8:00-17:00の表示にする
+                // 実際のセッションの開始時間と終了時間を使用
                 const displayStartTime = new Date(firstStartJST);
-                // 常に8:00に設定
-                displayStartTime.setHours(8, 0, 0);
-
-                const displayEndTime = new Date(firstStartJST);
-                // 常に17:00に設定
-                displayEndTime.setHours(17, 0, 0);
+                const displayEndTime = new Date(lastEndJST);
+                
+                // 通常勤務時間より上下にはみ出している場合、表示用に調整する
+                if (displayStartTime.getHours() < 8) {
+                    displayStartTime.setHours(8, 0, 0);
+                }
+                
+                if (displayEndTime.getHours() >= 17) {
+                    displayEndTime.setHours(17, 0, 0);
+                }
 
                 // フォーマット: 5/12(月) 8:00〜17:00 (8h)
                 listItem.textContent = `${month}/${day}(${dayOfWeek}) ${formatTimeString(displayStartTime)}〜${formatTimeString(displayEndTime)} (${this.formatTime(totalDuration)})`;

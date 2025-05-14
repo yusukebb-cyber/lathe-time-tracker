@@ -380,36 +380,74 @@ const GitHubAPI = {
     
     /**
      * Merge local and remote data
-     * This is a simple implementation that could be enhanced based on specific needs
+     * This is an enhanced implementation with improved conflict resolution
      * @param {Object} localData - Local data
      * @param {Object} remoteData - Remote data from GitHub
      * @returns {Object} Merged data
      */
     mergeData(localData, remoteData) {
-        // Enhanced merge strategy:
-        // 1. Preserve local active job state (don't overwrite with remote)
-        // 2. Combine completed jobs from both sources, removing duplicates
-
         const mergedData = {
             activeJob: null,
             completedJobs: [],
             lastSync: new Date().toISOString()
         };
 
-        // Always prefer the local active job state
-        // This prevents sync from unexpectedly reactivating a job that was completed locally
-        mergedData.activeJob = localData.activeJob;
+        // Handle active job with improved logic
+        // If the remote has an active job but local doesn't, the remote job was likely started on another device
+        if (!localData.activeJob && remoteData.activeJob) {
+            console.log('Adopting remote active job');
+            mergedData.activeJob = remoteData.activeJob;
+        } else if (localData.activeJob && !remoteData.activeJob) {
+            console.log('Keeping local active job');
+            mergedData.activeJob = localData.activeJob;
+        } else if (localData.activeJob && remoteData.activeJob) {
+            // Both have active jobs - choose the one that was updated most recently
+            const localUpdated = new Date(localData.activeJob.lastUpdated || localData.activeJob.startedAt);
+            const remoteUpdated = new Date(remoteData.activeJob.lastUpdated || remoteData.activeJob.startedAt);
+            
+            if (localUpdated >= remoteUpdated) {
+                console.log('Keeping local active job (more recently updated)');
+                mergedData.activeJob = localData.activeJob;
+            } else {
+                console.log('Adopting remote active job (more recently updated)');
+                mergedData.activeJob = remoteData.activeJob;
+            }
+        } else {
+            // Neither has active job
+            mergedData.activeJob = null;
+        }
         
-        // Combine completed jobs (using drawing number and completed timestamp as unique identifier)
+        // Improved job merging with more robust identifier and conflict resolution
         const allJobs = [...(localData.completedJobs || []), ...(remoteData.completedJobs || [])];
         const seenJobs = new Map();
         
         for (const job of allJobs) {
-            const key = `${job.drawingNumber}-${job.completedAt}`;
+            // Create a more specific unique identifier, including quantity to prevent overwriting different batches
+            const key = `${job.drawingNumber}-${job.itemQuantity || 1}-${job.startedAt}-${job.completedAt}`;
             
-            // If we haven't seen this job before, or this instance has more total time, use it
-            if (!seenJobs.has(key) || seenJobs.get(key).totalTimeMinutes < job.totalTimeMinutes) {
+            // More sophisticated conflict resolution strategy:
+            if (!seenJobs.has(key)) {
                 seenJobs.set(key, job);
+            } else {
+                const existingJob = seenJobs.get(key);
+                // Choose the job with the more recent last update
+                const existingUpdate = new Date(existingJob.lastUpdated || existingJob.completedAt);
+                const currentUpdate = new Date(job.lastUpdated || job.completedAt);
+                
+                if (currentUpdate > existingUpdate) {
+                    seenJobs.set(key, job);
+                } else if (currentUpdate.getTime() === existingUpdate.getTime()) {
+                    // If timestamps are identical, prefer the one with more data (longer sessions, more breaks)
+                    const existingSessionCount = existingJob.sessions ? existingJob.sessions.length : 0;
+                    const currentSessionCount = job.sessions ? job.sessions.length : 0;
+                    
+                    if (currentSessionCount > existingSessionCount) {
+                        seenJobs.set(key, job);
+                    } else if (existingJob.totalTimeMinutes < job.totalTimeMinutes) {
+                        // If same sessions count, prefer the one with more total time
+                        seenJobs.set(key, job);
+                    }
+                }
             }
         }
         
