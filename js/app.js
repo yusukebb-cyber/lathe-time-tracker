@@ -921,34 +921,20 @@ const LatheTimeTracker = {
                     return `${hours}:${minutes}`;
                 };
 
-                // 実際のセッションの開始時間と終了時間を使用
-                const displayStartTime = new Date(firstStartJST);
-                const displayEndTime = new Date(lastEndJST);
+                // この部分は廃止 - 重複コード
                 
-                // その日の実際の作業時間を表示
+                // その日の作業時間を表示 (実際の開始・終了時間)
                 const dateStr = `${month}/${day}(${dayOfWeek})`;
                 
-                // 実際の開始時刻と終了時刻を使用
-                let displayStartTime = new Date(firstStartJST);
-                let displayEndTime = new Date(lastEndJST);
-                
-                // データの整合性チェック - 終了時刻が開始時刻より前なら修正
-                if (displayEndTime < displayStartTime) {
-                    console.warn('整合性エラー: 終了時間が開始時間より前です', {
-                        start: displayStartTime.toISOString(),
-                        end: displayEndTime.toISOString()
-                    });
-                    // 開始時刻より30分後を終了時刻として設定
-                    displayEndTime = new Date(displayStartTime.getTime() + 30 * 60 * 1000);
-                }
-                
-                // 勤務時間外を調整
+                // 開始時間は必ず8:00以降
+                const displayStartTime = new Date(firstStartJST);
                 if (displayStartTime.getHours() < 8) {
                     displayStartTime.setHours(8, 0, 0);
                 }
                 
-                if (displayEndTime.getHours() >= 17 || 
-                    (displayEndTime.getHours() === 16 && displayEndTime.getMinutes() > 30)) {
+                // 終了時間は必ず17:00以前
+                const displayEndTime = new Date(lastEndJST);
+                if (displayEndTime.getHours() >= 17) {
                     displayEndTime.setHours(17, 0, 0);
                 }
                 
